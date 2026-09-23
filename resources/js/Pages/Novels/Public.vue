@@ -1,10 +1,24 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
-defineProps({
+const props = defineProps({
     novels: Array,
+    allTags: Array,
+    filters: Object,
 });
+
+const search = ref(props.filters.search ?? '');
+const selectedTag = ref(props.filters.tag ?? '');
+
+const applyFilters = () => {
+    router.get(
+        route('novels.public'),
+        { search: search.value || undefined, tag: selectedTag.value || undefined },
+        { preserveState: true, replace: true }
+    );
+};
 
 const toggleLike = (novelId) => {
     router.post(route('novels.like', novelId), {}, { preserveScroll: true });
@@ -22,6 +36,15 @@ const toggleLike = (novelId) => {
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-6 flex flex-wrap gap-3">
+                    <input v-model="search" type="text" class="vn-input flex-1"
+                        placeholder="Buscar por título o descripción..." @keydown.enter="applyFilters" />
+                    <select v-model="selectedTag" class="vn-input" style="width: auto" @change="applyFilters">
+                        <option value="">Todos los tags</option>
+                        <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
+                    </select>
+                    <button @click="applyFilters" class="vn-pill vn-pill--solid">Buscar</button>
+                </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="novel in novels" :key="novel.id" class="vn-tile">
                         <Link :href="route('play.show', novel.id)">
@@ -30,6 +53,13 @@ const toggleLike = (novelId) => {
 
                             <h3 class="vn-tile-title">{{ novel.title }}</h3>
                             <p class="vn-tile-desc">{{ novel.description }}</p>
+
+                            <div v-if="novel.tags.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+                                <span v-for="tag in novel.tags" :key="tag.id" class="vn-tag-chip">
+                                    {{ tag.name }}
+                                </span>
+                            </div>
+
                             <p class="vn-tile-author">por {{ novel.user.name }}</p>
                         </Link>
 
@@ -129,5 +159,57 @@ const toggleLike = (novelId) => {
 
 .vn-like--active {
     color: #ff8fc0;
+}
+
+.vn-input {
+    border-radius: 0.6rem;
+    border: 1px solid rgba(201, 184, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.9rem;
+    color: #fff6fb;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.vn-input:focus {
+    border-color: #ff5fa2;
+}
+
+.vn-input option {
+    background: #1a1140;
+    color: #fff6fb;
+}
+
+.vn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.vn-pill--solid {
+    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
+    color: #1a0f36;
+    box-shadow: 0 6px 18px rgba(255, 95, 162, 0.3);
+}
+
+.vn-pill--solid:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.vn-tag-chip {
+    display: inline-flex;
+    border-radius: 999px;
+    background: rgba(94, 241, 230, 0.12);
+    color: #5ef1e6;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
 }
 </style>

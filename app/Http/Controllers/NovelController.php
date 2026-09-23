@@ -39,8 +39,6 @@ class NovelController extends Controller
             $data['cover_image'] = $request->file('cover_image')->store('covers', 'public');
         }
 
-        $novel = Auth::user()->novels()->create($data);
-
         return redirect()->route('novels.index');
     }
     public function edit(Novel $novel)
@@ -48,7 +46,7 @@ class NovelController extends Controller
         $this->authorize('update', $novel);
 
         return Inertia::render('Novels/Edit', [
-            'novel' => $novel,
+            'novel' => $novel->load('tags'),
         ]);
     }
 
@@ -76,12 +74,10 @@ class NovelController extends Controller
 
         $novel->update($data);
 
-        if ($request->has('tags')) {
-            $tagIds = collect($validated['tags'] ?? [])
-                ->map(fn($name) => Tag::firstOrCreate(['name' => strtolower(trim($name))])->id);
+        $tagIds = collect($validated['tags'] ?? [])
+            ->map(fn($name) => Tag::firstOrCreate(['name' => strtolower(trim($name))])->id);
 
-            $novel->tags()->sync($tagIds);
-        }
+        $novel->tags()->sync($tagIds);
 
         return redirect()->route('novels.index');
     }

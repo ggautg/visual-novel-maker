@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({
     novel: Object,
@@ -12,7 +13,23 @@ const form = useForm({
     description: props.novel.description,
     status: props.novel.status,
     cover_image: null,
+    tags: props.novel.tags.map((t) => t.name),
 });
+
+// Texto libre para agregar un tag nuevo
+const newTag = ref('');
+
+const addTag = () => {
+    const value = newTag.value.trim().toLowerCase();
+    if (value && !form.tags.includes(value)) {
+        form.tags.push(value);
+    }
+    newTag.value = '';
+};
+
+const removeTag = (tag) => {
+    form.tags = form.tags.filter((t) => t !== tag);
+};
 
 const submit = () => {
     form
@@ -24,6 +41,7 @@ const submit = () => {
 </script>
 
 <template>
+
     <Head :title="novel.title" />
 
     <AuthenticatedLayout>
@@ -57,26 +75,27 @@ const submit = () => {
 
                     <div>
                         <label class="vn-label">Portada</label>
-                        <img
-                            v-if="novel.cover_image_url"
-                            :src="novel.cover_image_url"
-                            class="mb-2 h-32 w-24 rounded-lg border border-white/15 object-cover"
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            class="vn-input"
-                            @change="(e) => (form.cover_image = e.target.files[0])"
-                        />
+                        <img v-if="novel.cover_image_url" :src="novel.cover_image_url"
+                            class="mb-2 h-32 w-24 rounded-lg border border-white/15 object-cover" />
+                        <input type="file" accept="image/*" class="vn-input"
+                            @change="(e) => (form.cover_image = e.target.files[0])" />
                         <InputError :message="form.errors.cover_image" class="mt-1" />
                     </div>
 
-                    <button
-                        type="submit"
-                        class="vn-pill vn-pill--solid"
-                        :class="{ 'opacity-50': form.processing }"
-                        :disabled="form.processing"
-                    >
+                    <div>
+                        <label class="vn-label">Tags</label>
+                        <div class="mb-2 flex flex-wrap gap-2">
+                            <span v-for="tag in form.tags" :key="tag" class="vn-tag">
+                                {{ tag }}
+                                <button type="button" @click="removeTag(tag)" class="vn-tag-remove">×</button>
+                            </span>
+                        </div>
+                        <input v-model="newTag" type="text" class="vn-input"
+                            placeholder="Escribí un tag y presioná Enter" @keydown.enter.prevent="addTag" />
+                    </div>
+
+                    <button type="submit" class="vn-pill vn-pill--solid" :class="{ 'opacity-50': form.processing }"
+                        :disabled="form.processing">
                         Guardar cambios
                     </button>
                 </form>
@@ -118,9 +137,11 @@ const submit = () => {
     outline: none;
     transition: border-color 0.2s ease;
 }
+
 .vn-input:focus {
     border-color: #ff5fa2;
 }
+
 .vn-input option {
     background: #1a1140;
     color: #fff6fb;
@@ -141,11 +162,33 @@ const submit = () => {
     box-shadow: 0 8px 24px rgba(255, 95, 162, 0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .vn-pill:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(255, 95, 162, 0.45);
 }
+
 .vn-pill:disabled {
     cursor: not-allowed;
+}
+
+.vn-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    background: rgba(94, 241, 230, 0.12);
+    color: #5ef1e6;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+.vn-tag-remove {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
 }
 </style>

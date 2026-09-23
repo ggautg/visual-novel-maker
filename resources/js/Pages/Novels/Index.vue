@@ -45,6 +45,12 @@ const destroyNovel = (novelId) => {
                                 </span>
                             </div>
                             <p class="vn-tile-desc">{{ novel.description }}</p>
+
+                            <div v-if="novel.tags.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+                                <span v-for="tag in novel.tags" :key="tag.id" class="vn-tag-chip">
+                                    {{ tag.name }}
+                                </span>
+                            </div>
                         </Link>
 
                         <div class="vn-tile-actions">
@@ -80,10 +86,12 @@ const destroyNovel = (novelId) => {
 .vn-tile-action--danger {
     color: #ff6b8a;
 }
+
 .vn-tile-action--danger:hover {
     background: rgba(255, 95, 128, 0.12);
     color: #ff9db3;
 }
+
 .vn-page-title {
     font-family: 'Fredoka', sans-serif;
     font-weight: 600;
@@ -200,5 +208,14 @@ const destroyNovel = (novelId) => {
 .vn-tile-action--play {
     color: #5ef1e6;
     font-weight: 600;
+}
+
+.vn-tag-chip {
+    display: inline-flex;
+    border-radius: 999px;
+    background: rgba(94, 241, 230, 0.12);
+    color: #5ef1e6;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
 }
 </style>
