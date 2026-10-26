@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import ThemePicker from '@/Components/ThemePicker.vue';
 
 defineProps({
     canLogin: { type: Boolean },
@@ -23,30 +24,33 @@ defineProps({
 
         <div class="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6">
             <!-- Header -->
-            <header class="flex items-center justify-between py-8">
+            <header class="flex items-center justify-between gap-4 py-8">
                 <span class="vn-wordmark">VN Maker</span>
 
-                <nav v-if="canLogin" class="flex items-center gap-3 text-sm">
-                    <Link
-                        v-if="$page.props.auth.user"
-                        :href="route('novels.index')"
-                        class="vn-link"
-                    >
-                        Mi panel
-                    </Link>
-                    <template v-else>
-                        <Link :href="route('login')" class="vn-link">
-                            Entrar
-                        </Link>
+                <div class="flex items-center gap-3">
+                    <ThemePicker />
+                    <nav v-if="canLogin" class="flex items-center gap-3 text-sm">
                         <Link
-                            v-if="canRegister"
-                            :href="route('register')"
-                            class="vn-pill vn-pill--ghost"
+                            v-if="$page.props.auth.user"
+                            :href="route('novels.index')"
+                            class="vn-link"
                         >
-                            Crear cuenta
+                            Mi panel
                         </Link>
-                    </template>
-                </nav>
+                        <template v-else>
+                            <Link :href="route('login')" class="vn-link">
+                                Entrar
+                            </Link>
+                            <Link
+                                v-if="canRegister"
+                                :href="route('register')"
+                                class="vn-pill vn-pill--ghost"
+                            >
+                                Crear cuenta
+                            </Link>
+                        </template>
+                    </nav>
+                </div>
             </header>
 
             <!-- Hero -->

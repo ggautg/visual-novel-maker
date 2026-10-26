@@ -1,9 +1,11 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import ThemePicker from '@/Components/ThemePicker.vue';
 </script>
 
 <template>
     <div class="vn-page">
+        <ThemePicker class="absolute right-4 top-4 z-20" />
         <div class="vn-scanlines"></div>
         <div class="vn-star vn-star--1">✦</div>
         <div class="vn-star vn-star--2">✧</div>

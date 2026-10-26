@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref, watch, onUnmounted } from 'vue';
+import ThemePicker from '../../Components/ThemePicker.vue';
 
 const props = defineProps({
     playthrough: Object,
@@ -93,6 +94,7 @@ const confirmRestart = () => {
     <Head :title="`Jugando: ${novel.title}`" />
 
     <div class="relative h-screen w-full bg-black bg-cover bg-center text-white" :style="backgroundStyle">
+        <ThemePicker class="absolute left-4 top-4 z-30" />
         <!-- Música de fondo -->
         <audio v-if="scene?.background_music" :src="`/storage/${scene.background_music}`" autoplay loop />
 

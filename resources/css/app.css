@@ -1,3 +1,195 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    color-scheme: dark;
+    --vn-page-bg: radial-gradient(140% 60% at 50% 0%, #2a1b54 0%, #120b26 55%);
+    --vn-nav-bg: rgba(18, 11, 38, 0.82);
+    --vn-surface: rgba(255, 255, 255, 0.04);
+    --vn-control-bg: rgba(18, 11, 38, 0.92);
+    --vn-text: #fff6fb;
+    --vn-muted: #d9cffb;
+    --vn-accent: #ff5fa2;
+    --vn-accent-strong: #e8569c;
+    --vn-on-accent: #1a0f36;
+    --vn-border: rgba(201, 184, 255, 0.22);
+    --vn-shadow: rgba(0, 0, 0, 0.36);
+}
+
+html[data-vn-theme='current'] { color-scheme: dark; }
+
+html[data-vn-theme='gothic'] {
+    color-scheme: dark;
+    --vn-page-bg: radial-gradient(110% 70% at 50% 0%, #38213c 0%, #170f1c 52%, #0b0a10 100%);
+    --vn-nav-bg: rgba(16, 10, 19, 0.92);
+    --vn-surface: rgba(238, 223, 212, 0.055);
+    --vn-control-bg: rgba(17, 11, 20, 0.96);
+    --vn-text: #f2e7dc;
+    --vn-muted: #cbbbc6;
+    --vn-accent: #a52b50;
+    --vn-accent-strong: #721d3a;
+    --vn-on-accent: #fff1e7;
+    --vn-border: rgba(202, 157, 178, 0.3);
+    --vn-shadow: rgba(0, 0, 0, 0.52);
+}
+
+html[data-vn-theme='hopecore'] {
+    color-scheme: light;
+    --vn-page-bg: radial-gradient(100% 72% at 50% 0%, #fff6be 0%, #ffe9e7 48%, #ddf5ee 100%);
+    --vn-nav-bg: rgba(255, 252, 238, 0.86);
+    --vn-surface: rgba(255, 255, 255, 0.72);
+    --vn-control-bg: rgba(255, 255, 255, 0.92);
+    --vn-text: #473b51;
+    --vn-muted: #6a5b72;
+    --vn-accent: #f4bd4e;
+    --vn-accent-strong: #eea9b8;
+    --vn-on-accent: #503b25;
+    --vn-border: rgba(185, 143, 151, 0.3);
+    --vn-shadow: rgba(123, 94, 114, 0.16);
+}
+
+html[data-vn-theme='dark'] {
+    color-scheme: dark;
+    --vn-page-bg: linear-gradient(145deg, #080b12 0%, #111827 55%, #10131b 100%);
+    --vn-nav-bg: rgba(8, 11, 18, 0.94);
+    --vn-surface: rgba(255, 255, 255, 0.045);
+    --vn-control-bg: rgba(7, 11, 18, 0.96);
+    --vn-text: #e7edf5;
+    --vn-muted: #aab7c8;
+    --vn-accent: #55c4ef;
+    --vn-accent-strong: #348cb9;
+    --vn-on-accent: #08131a;
+    --vn-border: rgba(129, 160, 190, 0.23);
+    --vn-shadow: rgba(0, 0, 0, 0.62);
+}
+
+html[data-vn-theme='white'] {
+    color-scheme: light;
+    --vn-page-bg: linear-gradient(145deg, #ffffff 0%, #f4f5fb 55%, #eceefa 100%);
+    --vn-nav-bg: rgba(255, 255, 255, 0.92);
+    --vn-surface: rgba(255, 255, 255, 0.92);
+    --vn-control-bg: #ffffff;
+    --vn-text: #25283a;
+    --vn-muted: #5d6277;
+    --vn-accent: #6553cc;
+    --vn-accent-strong: #4c3bb3;
+    --vn-on-accent: #ffffff;
+    --vn-border: rgba(90, 92, 130, 0.2);
+    --vn-shadow: rgba(47, 49, 77, 0.12);
+}
+
+html, body, #app { min-height: 100%; }
+
+html[data-vn-theme] body {
+    background: var(--vn-page-bg);
+    color: var(--vn-text);
+    transition: background 220ms ease, color 220ms ease;
+}
+
+html[data-vn-theme] :is(.vn-shell, .vn-page) {
+    background: var(--vn-page-bg) !important;
+    color: var(--vn-text) !important;
+    transition: background 220ms ease, color 220ms ease;
+}
+
+html[data-vn-theme] .vn-nav {
+    background: var(--vn-nav-bg) !important;
+    border-color: var(--vn-border) !important;
+}
+
+html[data-vn-theme] :is(.vn-header, .vn-dropdown, .vn-card, .vn-panel, .vn-profile-card, .vn-form-card) {
+    background-color: var(--vn-surface) !important;
+    border-color: var(--vn-border) !important;
+    box-shadow: 0 14px 38px var(--vn-shadow);
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] .vn-dropdown { background: var(--vn-control-bg) !important; }
+
+html[data-vn-theme] :is(.vn-wordmark, .vn-title, .vn-page-title, .vn-panel-title, .vn-label, .vn-navlink, .vn-dropdown-link, .vn-link, .vn-panel-text, .vn-eyebrow) {
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-navlink:hover, .vn-dropdown-link:hover) {
+    background: var(--vn-surface) !important;
+}
+
+html[data-vn-theme] .vn-navlink--active {
+    color: var(--vn-accent) !important;
+    background: color-mix(in srgb, var(--vn-accent) 14%, transparent) !important;
+}
+
+html[data-vn-theme] .vn-pill--solid {
+    border-color: var(--vn-accent) !important;
+    background: linear-gradient(135deg, var(--vn-accent), var(--vn-accent-strong)) !important;
+    color: var(--vn-on-accent) !important;
+}
+
+html[data-vn-theme] .vn-pill--ghost {
+    border-color: var(--vn-border) !important;
+    background: var(--vn-surface) !important;
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-input, input:not([type='checkbox']):not([type='radio']), textarea) {
+    border-color: var(--vn-border) !important;
+    background-color: var(--vn-control-bg) !important;
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-input, input, textarea)::placeholder {
+    color: var(--vn-muted) !important;
+    opacity: 0.78;
+}
+
+html[data-vn-theme] .vn-scanlines { opacity: 0.28; }
+html[data-vn-theme] .vn-star { color: var(--vn-accent) !important; }
+
+html[data-vn-theme] .vn-theme-picker__select {
+    border-color: var(--vn-border) !important;
+    background: var(--vn-control-bg) !important;
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme='gothic'] :is(.vn-shell, .vn-page, .vn-title, .vn-page-title, .vn-wordmark) {
+    font-family: Georgia, 'Times New Roman', serif !important;
+}
+
+html[data-vn-theme='gothic'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+    border-radius: 0.35rem 1rem 0.35rem 1rem !important;
+    box-shadow: inset 0 0 0 1px rgba(202, 157, 178, 0.07), 0 16px 42px var(--vn-shadow) !important;
+}
+
+html[data-vn-theme='hopecore'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 16px 42px var(--vn-shadow) !important;
+}
+
+html[data-vn-theme='white'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+    box-shadow: 0 12px 34px var(--vn-shadow) !important;
+}
+
+html[data-vn-theme='hopecore'] [class~='bg-black/80'],
+html[data-vn-theme='white'] [class~='bg-black/80'] {
+    background: rgba(255, 252, 244, 0.94) !important;
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme='hopecore'] [class~='bg-black/80'] .text-white,
+html[data-vn-theme='white'] [class~='bg-black/80'] .text-white {
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme='dark'] [class~='bg-black/80'] { background: rgba(7, 11, 18, 0.92) !important; }
+html[data-vn-theme='gothic'] [class~='bg-black/80'] { background: rgba(14, 9, 17, 0.94) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-vn-theme] *,
+    html[data-vn-theme] *::before,
+    html[data-vn-theme] *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

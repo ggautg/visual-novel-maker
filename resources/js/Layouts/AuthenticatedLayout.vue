@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import ThemePicker from '@/Components/ThemePicker.vue';
 
 const showingNavigationDropdown = ref(false);
 const showingUserMenu = ref(false);
@@ -32,6 +33,8 @@ const showingUserMenu = ref(false);
                         </Link>
                     </div>
                 </div>
+
+                <ThemePicker class="ml-auto mr-3 hidden sm:flex" />
 
                 <!-- Menú de usuario (desktop) -->
                 <div class="relative hidden sm:block">
@@ -81,6 +84,9 @@ const showingUserMenu = ref(false);
                     <Link :href="route('dashboard')" class="vn-navlink block">Dashboard</Link>
                     <Link :href="route('novels.index')" class="vn-navlink block">Novelas</Link>
                     <Link :href="route('novels.public')" class="vn-navlink block">Explorar</Link>
+                </div>
+                <div class="px-4 pb-3">
+                    <ThemePicker />
                 </div>
                 <div class="border-t border-white/10 px-4 py-3">
                     <div class="text-sm font-medium text-[#FFF6FB]">{{ $page.props.auth.user.name }}</div>
