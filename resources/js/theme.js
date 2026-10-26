@@ -2,11 +2,12 @@ export const DEFAULT_THEME = 'current';
 export const THEME_STORAGE_KEY = 'vn-maker-theme';
 
 export const THEMES = Object.freeze([
-    Object.freeze({ id: 'current', label: 'Actual' }),
+    Object.freeze({ id: 'current', label: 'Púrpura' }),
     Object.freeze({ id: 'gothic', label: 'Monja gótica' }),
     Object.freeze({ id: 'hopecore', label: 'Sunshine esperanza (hopecore)' }),
     Object.freeze({ id: 'dark', label: 'Dark' }),
     Object.freeze({ id: 'white', label: 'White' }),
+    Object.freeze({ id: 'hellfire', label: 'Hellfire love' }),
 ]);
 
 const themeIds = new Set(THEMES.map(({ id }) => id));

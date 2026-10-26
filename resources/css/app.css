@@ -15,6 +15,10 @@
     --vn-on-accent: #1a0f36;
     --vn-border: rgba(201, 184, 255, 0.22);
     --vn-shadow: rgba(0, 0, 0, 0.36);
+    --vn-status: #5ef1e6;
+    --vn-accent-text: #ff8fc0;
+    --vn-danger-text: #ff6b8a;
+    --vn-accent-ink: var(--vn-accent);
 }
 
 html[data-vn-theme='current'] { color-scheme: dark; }
@@ -40,13 +44,17 @@ html[data-vn-theme='hopecore'] {
     --vn-nav-bg: rgba(255, 252, 238, 0.86);
     --vn-surface: rgba(255, 255, 255, 0.72);
     --vn-control-bg: rgba(255, 255, 255, 0.92);
-    --vn-text: #473b51;
-    --vn-muted: #6a5b72;
+    --vn-text: #3f3448;
+    --vn-muted: #5f5067;
     --vn-accent: #f4bd4e;
     --vn-accent-strong: #eea9b8;
-    --vn-on-accent: #503b25;
-    --vn-border: rgba(185, 143, 151, 0.3);
-    --vn-shadow: rgba(123, 94, 114, 0.16);
+    --vn-on-accent: #3d2a12;
+    --vn-border: rgba(150, 106, 116, 0.34);
+    --vn-shadow: rgba(123, 94, 114, 0.18);
+    --vn-status: #0d6b66;
+    --vn-accent-text: #a01a56;
+    --vn-danger-text: #a91238;
+    --vn-accent-ink: #7a4f00;
 }
 
 html[data-vn-theme='dark'] {
@@ -70,13 +78,32 @@ html[data-vn-theme='white'] {
     --vn-nav-bg: rgba(255, 255, 255, 0.92);
     --vn-surface: rgba(255, 255, 255, 0.92);
     --vn-control-bg: #ffffff;
-    --vn-text: #25283a;
-    --vn-muted: #5d6277;
+    --vn-text: #202334;
+    --vn-muted: #4c5165;
     --vn-accent: #6553cc;
     --vn-accent-strong: #4c3bb3;
     --vn-on-accent: #ffffff;
-    --vn-border: rgba(90, 92, 130, 0.2);
-    --vn-shadow: rgba(47, 49, 77, 0.12);
+    --vn-border: rgba(90, 92, 130, 0.24);
+    --vn-shadow: rgba(47, 49, 77, 0.14);
+    --vn-status: #0b5f5a;
+    --vn-accent-text: #8f1450;
+    --vn-danger-text: #a01032;
+    --vn-accent-ink: #4c3bb3;
+}
+
+html[data-vn-theme='hellfire'] {
+    color-scheme: dark;
+    --vn-page-bg: radial-gradient(120% 78% at 50% 0%, #4b0c14 0%, #1b0508 52%, #080304 100%);
+    --vn-nav-bg: rgba(16, 4, 7, 0.92);
+    --vn-surface: rgba(255, 96, 60, 0.06);
+    --vn-control-bg: rgba(20, 5, 8, 0.95);
+    --vn-text: #ffece3;
+    --vn-muted: #e0a89a;
+    --vn-accent: #ff5a36;
+    --vn-accent-strong: #e0163f;
+    --vn-on-accent: #1b0307;
+    --vn-border: rgba(255, 128, 92, 0.28);
+    --vn-shadow: rgba(0, 0, 0, 0.58);
 }
 
 html, body, #app { min-height: 100%; }
@@ -107,8 +134,46 @@ html[data-vn-theme] :is(.vn-header, .vn-dropdown, .vn-card, .vn-panel, .vn-profi
 
 html[data-vn-theme] .vn-dropdown { background: var(--vn-control-bg) !important; }
 
-html[data-vn-theme] :is(.vn-wordmark, .vn-title, .vn-page-title, .vn-panel-title, .vn-label, .vn-navlink, .vn-dropdown-link, .vn-link, .vn-panel-text, .vn-eyebrow) {
+html[data-vn-theme] :is(.vn-wordmark, .vn-title, .vn-page-title, .vn-panel-title, .vn-label, .vn-navlink, .vn-dropdown-link, .vn-link, .vn-panel-text, .vn-eyebrow, .vn-card-title, .vn-tile-title, .vn-scene-title, .vn-variable-name, .vn-choice-text, .vn-node-text) {
     color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-card-subtitle, .vn-tile-desc, .vn-tile-author, .vn-tile-action, .vn-like, .vn-node-preview, .vn-tile-cover--placeholder, .vn-badge--draft) {
+    color: var(--vn-muted) !important;
+}
+
+html[data-vn-theme] :is(.vn-status, .vn-tag, .vn-tag-chip, .vn-badge--live, .vn-tile-action--play) {
+    color: var(--vn-status) !important;
+}
+
+html[data-vn-theme] :is(.vn-node-speaker, .vn-like--active, .vn-panel-marker) {
+    color: var(--vn-accent-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-link--danger, .vn-link--danger:hover, .vn-tile-action--danger, .vn-tile-action--danger:hover) {
+    color: var(--vn-danger-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-link:hover, .vn-navlink:hover, .vn-dropdown-link:hover, .vn-tile-action:hover) {
+    color: var(--vn-accent-ink) !important;
+}
+
+html[data-vn-theme] .vn-pill--ghost:hover:not(:disabled) {
+    color: var(--vn-status) !important;
+}
+
+html[data-vn-theme] :is([class~='text-[#FFF6FB]']) {
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(
+    [class~='text-[#D9CFFB]'],
+    [class~='text-[#B8ACDD]'],
+    [class~='text-[#9D8FD6]'],
+    [class~='text-[#8A7EC0]'],
+    [class~='text-[#6E5FA3]']
+) {
+    color: var(--vn-muted) !important;
 }
 
 html[data-vn-theme] :is(.vn-navlink:hover, .vn-dropdown-link:hover) {
@@ -116,7 +181,7 @@ html[data-vn-theme] :is(.vn-navlink:hover, .vn-dropdown-link:hover) {
 }
 
 html[data-vn-theme] .vn-navlink--active {
-    color: var(--vn-accent) !important;
+    color: var(--vn-accent-ink) !important;
     background: color-mix(in srgb, var(--vn-accent) 14%, transparent) !important;
 }
 
@@ -141,6 +206,16 @@ html[data-vn-theme] :is(.vn-input, input:not([type='checkbox']):not([type='radio
 html[data-vn-theme] :is(.vn-input, input, textarea)::placeholder {
     color: var(--vn-muted) !important;
     opacity: 0.78;
+}
+
+html[data-vn-theme='hopecore'] :is(.vn-input, input, textarea)::placeholder,
+html[data-vn-theme='white'] :is(.vn-input, input, textarea)::placeholder {
+    opacity: 0.92;
+}
+
+html[data-vn-theme] .vn-input option {
+    background-color: var(--vn-control-bg) !important;
+    color: var(--vn-text) !important;
 }
 
 html[data-vn-theme] .vn-scanlines { opacity: 0.28; }
@@ -170,6 +245,19 @@ html[data-vn-theme='white'] :is(.vn-card, .vn-panel, .vn-dropdown) {
     box-shadow: 0 12px 34px var(--vn-shadow) !important;
 }
 
+html[data-vn-theme='hellfire'] :is(.vn-shell, .vn-page) {
+    background: radial-gradient(80% 45% at 50% 100%, rgba(224, 22, 63, 0.16) 0%, transparent 70%), var(--vn-page-bg) !important;
+}
+
+html[data-vn-theme='hellfire'] :is(.vn-title, .vn-page-title, .vn-wordmark) {
+    text-shadow: 0 0 22px rgba(255, 90, 54, 0.4);
+}
+
+html[data-vn-theme='hellfire'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+    border-radius: 0.9rem !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 90, 54, 0.09), 0 18px 46px var(--vn-shadow) !important;
+}
+
 html[data-vn-theme='hopecore'] [class~='bg-black/80'],
 html[data-vn-theme='white'] [class~='bg-black/80'] {
     background: rgba(255, 252, 244, 0.94) !important;
@@ -183,6 +271,7 @@ html[data-vn-theme='white'] [class~='bg-black/80'] .text-white {
 
 html[data-vn-theme='dark'] [class~='bg-black/80'] { background: rgba(7, 11, 18, 0.92) !important; }
 html[data-vn-theme='gothic'] [class~='bg-black/80'] { background: rgba(14, 9, 17, 0.94) !important; }
+html[data-vn-theme='hellfire'] [class~='bg-black/80'] { background: rgba(12, 3, 5, 0.94) !important; }
 
 @media (prefers-reduced-motion: reduce) {
     html[data-vn-theme] *,

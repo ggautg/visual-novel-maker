@@ -8,16 +8,17 @@ try {
     themeModule = {};
 }
 
-test('offers the five named themes and keeps the existing theme as default', () => {
+test('offers the six named themes and keeps the existing theme as default', () => {
     assert.equal(themeModule.DEFAULT_THEME, 'current');
     assert.deepEqual(
         themeModule.THEMES?.map(({ id, label }) => [id, label]),
         [
-            ['current', 'Actual'],
+            ['current', 'Púrpura'],
             ['gothic', 'Monja gótica'],
             ['hopecore', 'Sunshine esperanza (hopecore)'],
             ['dark', 'Dark'],
             ['white', 'White'],
+            ['hellfire', 'Hellfire love'],
         ],
     );
 });
