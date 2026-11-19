@@ -1,13 +1,11 @@
 <script setup>
 import { computed } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SaveButton from '@/Components/SaveButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
-    status: {
-        type: String,
-    },
+    status: { type: String, default: '' },
 });
 
 const form = useForm({});
@@ -16,46 +14,38 @@ const submit = () => {
     form.post(route('verification.send'));
 };
 
-const verificationLinkSent = computed(
-    () => props.status === 'verification-link-sent',
-);
+const verificationLinkSent = computed(() => props.status === 'verification-link-sent');
 </script>
 
 <template>
     <GuestLayout>
-        <Head title="Email Verification" />
+        <Head title="Verificación de correo" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Thanks for signing up! Before getting started, could you verify your
-            email address by clicking on the link we just emailed to you? If you
-            didn't receive the email, we will gladly send you another.
+        <h1 class="vn-card-title">Verifica tu correo electrónico</h1>
+        <p class="vn-card-subtitle">
+            Gracias por registrarte. Antes de empezar, confirma tu dirección con el enlace que te enviamos.
+            Si no lo recibiste, podemos enviarte otro.
+        </p>
+
+        <div v-if="verificationLinkSent" class="vn-status" role="status">
+            Hemos enviado un nuevo enlace de verificación a tu correo electrónico.
         </div>
 
-        <div
-            class="mb-4 text-sm font-medium text-green-600"
-            v-if="verificationLinkSent"
-        >
-            A new verification link has been sent to the email address you
-            provided during registration.
-        </div>
+        <form class="mt-6 flex flex-wrap items-center justify-between gap-4" @submit.prevent="submit">
+            <SaveButton
+                :processing="form.processing"
+                label="Reenviar enlace de verificación"
+                processing-label="Enviando…"
+            />
 
-        <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Resend Verification Email
-                </PrimaryButton>
-
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >Log Out</Link
-                >
-            </div>
+            <Link
+                :href="route('logout')"
+                method="post"
+                as="button"
+                class="vn-link text-sm"
+            >
+                Cerrar sesión
+            </Link>
         </form>
     </GuestLayout>
 </template>

@@ -9,39 +9,69 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Gestiona las novelas del usuario autenticado: listado, creación, edición y borrado.
+ * Solo el autor puede modificar o eliminar cada novela.
+ */
 class NovelController extends Controller
 {
     use AuthorizesRequests;
-    public function index()
+
+    /**
+     * Lista las novelas propias con sus etiquetas y el estado de "me gusta" del usuario.
+     */
+    public function index(): Response
     {
         return Inertia::render('Novels/Index', [
-            'novels' => Auth::user()->novels()->with('tags')->latest()->get(),
+            'novels' => Auth::user()->novels()
+                ->with('tags')
+                ->withExists([
+                    'likedByUsers as is_liked_by_me' => fn ($consulta) => $consulta->where('user_id', Auth::id()),
+                ])
+                ->latest()
+                ->get(),
         ]);
     }
 
-    public function create()
+    /**
+     * Muestra el formulario de creación de una novela nueva.
+     */
+    public function create(): Response
     {
         return Inertia::render('Novels/Create');
     }
 
-    public function store(Request $request)
+    /**
+     * Valida los datos y crea la novela asociada al usuario autenticado.
+     * Devuelve una redirección al listado de novelas.
+     */
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $validados = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
             'cover_image' => ['nullable', 'image', 'max:4096'],
         ]);
 
-        $data = collect($validated)->except('cover_image')->toArray();
+        $datos = collect($validados)->except('cover_image')->toArray();
 
         if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+            $datos['cover_image'] = $request->file('cover_image')->store('covers', 'public');
         }
+
+        $request->user()->novels()->create($datos);
 
         return redirect()->route('novels.index');
     }
-    public function edit(Novel $novel)
+
+    /**
+     * Muestra el formulario de edición de una novela propia.
+     * Verifica que el usuario sea el autor.
+     */
+    public function edit(Novel $novel): Response
     {
         $this->authorize('update', $novel);
 
@@ -50,43 +80,59 @@ class NovelController extends Controller
         ]);
     }
 
-    public function update(Request $request, Novel $novel)
+    /**
+     * Actualiza una novela propia, sus etiquetas y, si llega, su portada.
+     * Si no se envía la clave tags se conservan las etiquetas actuales.
+     */
+    public function update(Request $request, Novel $novel): RedirectResponse
     {
         $this->authorize('update', $novel);
 
-        $validated = $request->validate([
+        $validados = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
             'status' => ['required', 'in:draft,published'],
             'cover_image' => ['nullable', 'image', 'max:4096'],
-            'tags' => ['nullable', 'array'],
+            'tags' => ['nullable', 'array', 'max:10'],
             'tags.*' => ['string', 'max:50'],
         ]);
 
-        $data = collect($validated)->except(['cover_image', 'tags'])->toArray();
+        $datos = collect($validados)->except(['cover_image', 'tags'])->toArray();
+        $portadaAnterior = $novel->cover_image;
 
         if ($request->hasFile('cover_image')) {
-            if ($novel->cover_image) {
-                Storage::disk('public')->delete($novel->cover_image);
-            }
-            $data['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+            $datos['cover_image'] = $request->file('cover_image')->store('covers', 'public');
         }
 
-        $novel->update($data);
+        $novel->update($datos);
 
-        $tagIds = collect($validated['tags'] ?? [])
-            ->map(fn($name) => Tag::firstOrCreate(['name' => strtolower(trim($name))])->id);
+        if ($request->hasFile('cover_image') && $portadaAnterior) {
+            Storage::disk('public')->delete($portadaAnterior);
+        }
 
-        $novel->tags()->sync($tagIds);
+        if (array_key_exists('tags', $validados)) {
+            $idsEtiquetas = collect($validados['tags'] ?? [])
+                ->map(fn ($nombre) => Tag::firstOrCreate(['name' => strtolower(trim($nombre))])->id);
+
+            $novel->tags()->sync($idsEtiquetas);
+        }
 
         return redirect()->route('novels.index');
     }
 
-    public function destroy(Novel $novel)
+    /**
+     * Elimina una novela propia y borra también su fichero de portada.
+     */
+    public function destroy(Novel $novel): RedirectResponse
     {
         $this->authorize('delete', $novel);
 
+        $portada = $novel->cover_image;
         $novel->delete();
+
+        if ($portada) {
+            Storage::disk('public')->delete($portada);
+        }
 
         return redirect()->route('novels.index');
     }

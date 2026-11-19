@@ -25,24 +25,25 @@ Route::get('/', function () {
     ]);
 });
 
+// El catálogo es público: no debe quedar detrás de auth/verified.
+Route::get('explore', [PublicNovelController::class, 'index'])->name('novels.public');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::redirect('/dashboard', '/novels')->middleware(['auth', 'verified'])->name('dashboard');
-    Route::resource('novels', NovelController::class);
-    Route::post('novels/{novel}/restart', [PlaythroughController::class, 'restart'])->name('play.restart');
-    Route::resource('novels.scenes', SceneController::class)->shallow();
-    Route::resource('novels.characters', CharacterController::class)->shallow();
-    Route::resource('scenes.dialogue-nodes', DialogueNodeController::class)->shallow();
-    Route::resource('dialogue-nodes.choices', ChoiceController::class)->shallow();
-    Route::resource('novels.variables', VariableController::class)->shallow();
-    Route::resource('choices.variable-effects', VariableEffectController::class)
-        ->shallow()
-        ->except(['index', 'create', 'edit']);
-    Route::resource('characters.expressions', CharacterExpressionController::class)
-        ->shallow()
-        ->except(['index', 'create', 'edit', 'update']);
+    Route::redirect('/dashboard', '/novels')->name('dashboard');
+
+    // Solo se registran las acciones que los controladores implementan.
+    Route::resource('novels', NovelController::class)->except(['show']);
+    Route::resource('novels.scenes', SceneController::class)->shallow()->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('novels.characters', CharacterController::class)->shallow()->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('scenes.dialogue-nodes', DialogueNodeController::class)->shallow()->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('dialogue-nodes.choices', ChoiceController::class)->shallow()->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('novels.variables', VariableController::class)->shallow()->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('choices.variable-effects', VariableEffectController::class)->shallow()->only(['store', 'update', 'destroy']);
+    Route::resource('characters.expressions', CharacterExpressionController::class)->shallow()->only(['store', 'destroy']);
+
     Route::get('novels/{novel}/play', [PlaythroughController::class, 'show'])->name('play.show');
+    Route::post('novels/{novel}/restart', [PlaythroughController::class, 'restart'])->name('play.restart');
     Route::post('playthroughs/{playthrough}/advance', [PlaythroughController::class, 'advance'])->name('play.advance');
-    Route::get('explore', [PublicNovelController::class, 'index'])->name('novels.public');
     Route::post('novels/{novel}/like', [NovelLikeController::class, 'toggle'])->name('novels.like');
 });
 

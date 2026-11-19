@@ -2,143 +2,725 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Cada tema define la paleta completa para que ningún color "salte" al cambiar de estilo. */
+:root,
+html[data-vn-theme='current'] {
     color-scheme: dark;
     --vn-page-bg: radial-gradient(140% 60% at 50% 0%, #2a1b54 0%, #120b26 55%);
-    --vn-nav-bg: rgba(18, 11, 38, 0.82);
-    --vn-surface: rgba(255, 255, 255, 0.04);
-    --vn-control-bg: rgba(18, 11, 38, 0.92);
+    --vn-nav-bg: rgba(18, 11, 38, 0.86);
+    --vn-surface: rgba(255, 255, 255, 0.05);
+    --vn-surface-strong: rgba(28, 17, 58, 0.94);
+    --vn-control-bg: rgba(18, 11, 38, 0.94);
     --vn-text: #fff6fb;
     --vn-muted: #d9cffb;
     --vn-accent: #ff5fa2;
     --vn-accent-strong: #e8569c;
-    --vn-on-accent: #1a0f36;
-    --vn-border: rgba(201, 184, 255, 0.22);
-    --vn-shadow: rgba(0, 0, 0, 0.36);
-    --vn-status: #5ef1e6;
     --vn-accent-text: #ff8fc0;
-    --vn-danger-text: #ff6b8a;
-    --vn-accent-ink: var(--vn-accent);
+    --vn-accent-ink: #ff8fc0;
+    --vn-on-accent: #1a0f36;
+    --vn-border: rgba(201, 184, 255, 0.24);
+    --vn-shadow: rgba(0, 0, 0, 0.38);
+    --vn-status: #5ef1e6;
+    --vn-danger: #ff6b8a;
+    --vn-danger-text: #ff93ab;
+    --vn-focus: rgba(255, 95, 162, 0.32);
+    --vn-modal-overlay: rgba(8, 5, 18, 0.72);
+    --vn-game-overlay: rgba(10, 6, 22, 0.76);
+    --vn-game-panel: rgba(18, 11, 38, 0.92);
+    --vn-choice-bg: rgba(255, 255, 255, 0.06);
+    --vn-choice-hover: rgba(255, 95, 162, 0.2);
 }
-
-html[data-vn-theme='current'] { color-scheme: dark; }
 
 html[data-vn-theme='gothic'] {
     color-scheme: dark;
     --vn-page-bg: radial-gradient(110% 70% at 50% 0%, #38213c 0%, #170f1c 52%, #0b0a10 100%);
-    --vn-nav-bg: rgba(16, 10, 19, 0.92);
-    --vn-surface: rgba(238, 223, 212, 0.055);
+    --vn-nav-bg: rgba(16, 10, 19, 0.94);
+    --vn-surface: rgba(238, 223, 212, 0.06);
+    --vn-surface-strong: rgba(24, 15, 26, 0.95);
     --vn-control-bg: rgba(17, 11, 20, 0.96);
     --vn-text: #f2e7dc;
     --vn-muted: #cbbbc6;
     --vn-accent: #a52b50;
     --vn-accent-strong: #721d3a;
+    --vn-accent-text: #e190a9;
+    --vn-accent-ink: #d3688a;
     --vn-on-accent: #fff1e7;
-    --vn-border: rgba(202, 157, 178, 0.3);
-    --vn-shadow: rgba(0, 0, 0, 0.52);
+    --vn-border: rgba(202, 157, 178, 0.32);
+    --vn-shadow: rgba(0, 0, 0, 0.54);
+    --vn-status: #8fd9c5;
+    --vn-danger: #b83252;
+    --vn-danger-text: #ff9a9a;
+    --vn-focus: rgba(165, 43, 80, 0.4);
+    --vn-modal-overlay: rgba(8, 5, 10, 0.78);
+    --vn-game-overlay: rgba(10, 6, 13, 0.8);
+    --vn-game-panel: rgba(20, 12, 23, 0.94);
+    --vn-choice-bg: rgba(238, 223, 212, 0.07);
+    --vn-choice-hover: rgba(165, 43, 80, 0.26);
 }
 
 html[data-vn-theme='hopecore'] {
     color-scheme: light;
     --vn-page-bg: radial-gradient(100% 72% at 50% 0%, #fff6be 0%, #ffe9e7 48%, #ddf5ee 100%);
-    --vn-nav-bg: rgba(255, 252, 238, 0.86);
-    --vn-surface: rgba(255, 255, 255, 0.72);
-    --vn-control-bg: rgba(255, 255, 255, 0.92);
+    --vn-nav-bg: rgba(255, 252, 238, 0.9);
+    --vn-surface: rgba(255, 255, 255, 0.76);
+    --vn-surface-strong: rgba(255, 252, 246, 0.97);
+    --vn-control-bg: rgba(255, 255, 255, 0.94);
     --vn-text: #3f3448;
     --vn-muted: #5f5067;
     --vn-accent: #f4bd4e;
     --vn-accent-strong: #eea9b8;
-    --vn-on-accent: #3d2a12;
-    --vn-border: rgba(150, 106, 116, 0.34);
-    --vn-shadow: rgba(123, 94, 114, 0.18);
-    --vn-status: #0d6b66;
     --vn-accent-text: #a01a56;
-    --vn-danger-text: #a91238;
     --vn-accent-ink: #7a4f00;
+    --vn-on-accent: #3d2a12;
+    --vn-border: rgba(150, 106, 116, 0.36);
+    --vn-shadow: rgba(123, 94, 114, 0.2);
+    --vn-status: #0d6b66;
+    --vn-danger: #a91238;
+    --vn-danger-text: #a91238;
+    --vn-focus: rgba(244, 189, 78, 0.4);
+    --vn-modal-overlay: rgba(63, 52, 72, 0.42);
+    --vn-game-overlay: rgba(255, 250, 235, 0.8);
+    --vn-game-panel: rgba(255, 252, 246, 0.94);
+    --vn-choice-bg: rgba(255, 255, 255, 0.86);
+    --vn-choice-hover: rgba(244, 189, 78, 0.28);
 }
 
 html[data-vn-theme='dark'] {
     color-scheme: dark;
     --vn-page-bg: linear-gradient(145deg, #080b12 0%, #111827 55%, #10131b 100%);
-    --vn-nav-bg: rgba(8, 11, 18, 0.94);
-    --vn-surface: rgba(255, 255, 255, 0.045);
+    --vn-nav-bg: rgba(8, 11, 18, 0.96);
+    --vn-surface: rgba(255, 255, 255, 0.05);
+    --vn-surface-strong: rgba(13, 19, 30, 0.96);
     --vn-control-bg: rgba(7, 11, 18, 0.96);
     --vn-text: #e7edf5;
     --vn-muted: #aab7c8;
     --vn-accent: #55c4ef;
     --vn-accent-strong: #348cb9;
+    --vn-accent-text: #8fdcff;
+    --vn-accent-ink: #8fdcff;
     --vn-on-accent: #08131a;
-    --vn-border: rgba(129, 160, 190, 0.23);
-    --vn-shadow: rgba(0, 0, 0, 0.62);
+    --vn-border: rgba(129, 160, 190, 0.28);
+    --vn-shadow: rgba(0, 0, 0, 0.64);
+    --vn-status: #6ee7c8;
+    --vn-danger: #f87184;
+    --vn-danger-text: #ff9aa8;
+    --vn-focus: rgba(85, 196, 239, 0.32);
+    --vn-modal-overlay: rgba(3, 6, 12, 0.78);
+    --vn-game-overlay: rgba(4, 8, 15, 0.78);
+    --vn-game-panel: rgba(7, 12, 21, 0.94);
+    --vn-choice-bg: rgba(255, 255, 255, 0.06);
+    --vn-choice-hover: rgba(85, 196, 239, 0.2);
 }
 
 html[data-vn-theme='white'] {
     color-scheme: light;
     --vn-page-bg: linear-gradient(145deg, #ffffff 0%, #f4f5fb 55%, #eceefa 100%);
-    --vn-nav-bg: rgba(255, 255, 255, 0.92);
+    --vn-nav-bg: rgba(255, 255, 255, 0.94);
     --vn-surface: rgba(255, 255, 255, 0.92);
+    --vn-surface-strong: #ffffff;
     --vn-control-bg: #ffffff;
     --vn-text: #202334;
     --vn-muted: #4c5165;
     --vn-accent: #6553cc;
     --vn-accent-strong: #4c3bb3;
-    --vn-on-accent: #ffffff;
-    --vn-border: rgba(90, 92, 130, 0.24);
-    --vn-shadow: rgba(47, 49, 77, 0.14);
-    --vn-status: #0b5f5a;
     --vn-accent-text: #8f1450;
-    --vn-danger-text: #a01032;
     --vn-accent-ink: #4c3bb3;
+    --vn-on-accent: #ffffff;
+    --vn-border: rgba(90, 92, 130, 0.28);
+    --vn-shadow: rgba(47, 49, 77, 0.16);
+    --vn-status: #0b5f5a;
+    --vn-danger: #a01032;
+    --vn-danger-text: #a01032;
+    --vn-focus: rgba(101, 83, 204, 0.26);
+    --vn-modal-overlay: rgba(32, 35, 52, 0.42);
+    --vn-game-overlay: rgba(250, 250, 255, 0.82);
+    --vn-game-panel: rgba(255, 255, 255, 0.95);
+    --vn-choice-bg: rgba(244, 245, 251, 0.94);
+    --vn-choice-hover: rgba(101, 83, 204, 0.16);
 }
 
 html[data-vn-theme='hellfire'] {
     color-scheme: dark;
     --vn-page-bg: radial-gradient(120% 78% at 50% 0%, #4b0c14 0%, #1b0508 52%, #080304 100%);
-    --vn-nav-bg: rgba(16, 4, 7, 0.92);
-    --vn-surface: rgba(255, 96, 60, 0.06);
-    --vn-control-bg: rgba(20, 5, 8, 0.95);
+    --vn-nav-bg: rgba(16, 4, 7, 0.94);
+    --vn-surface: rgba(255, 96, 60, 0.07);
+    --vn-surface-strong: rgba(28, 6, 9, 0.96);
+    --vn-control-bg: rgba(20, 5, 8, 0.96);
     --vn-text: #ffece3;
     --vn-muted: #e0a89a;
     --vn-accent: #ff5a36;
     --vn-accent-strong: #e0163f;
+    --vn-accent-text: #ffab8d;
+    --vn-accent-ink: #ff8a63;
     --vn-on-accent: #1b0307;
-    --vn-border: rgba(255, 128, 92, 0.28);
-    --vn-shadow: rgba(0, 0, 0, 0.58);
+    --vn-border: rgba(255, 128, 92, 0.3);
+    --vn-shadow: rgba(0, 0, 0, 0.6);
+    --vn-status: #7ce0c2;
+    --vn-danger: #ff6b5a;
+    --vn-danger-text: #ff9b8f;
+    --vn-focus: rgba(255, 90, 54, 0.38);
+    --vn-modal-overlay: rgba(10, 2, 4, 0.8);
+    --vn-game-overlay: rgba(12, 3, 5, 0.8);
+    --vn-game-panel: rgba(20, 5, 8, 0.94);
+    --vn-choice-bg: rgba(255, 96, 60, 0.09);
+    --vn-choice-hover: rgba(255, 90, 54, 0.26);
 }
 
-html, body, #app { min-height: 100%; }
+html,
+body,
+#app {
+    min-height: 100%;
+}
 
 html[data-vn-theme] body {
     background: var(--vn-page-bg);
     color: var(--vn-text);
+    font-family: 'Rubik', system-ui, sans-serif;
     transition: background 220ms ease, color 220ms ease;
 }
+
+/* ---------- Superficies y tipografía ---------- */
 
 html[data-vn-theme] :is(.vn-shell, .vn-page) {
+    position: relative;
+    min-height: 100vh;
     background: var(--vn-page-bg) !important;
     color: var(--vn-text) !important;
+    font-family: 'Rubik', system-ui, sans-serif;
     transition: background 220ms ease, color 220ms ease;
 }
 
-html[data-vn-theme] .vn-nav {
-    background: var(--vn-nav-bg) !important;
-    border-color: var(--vn-border) !important;
+.vn-shell {
+    isolation: isolate;
 }
 
-html[data-vn-theme] :is(.vn-header, .vn-dropdown, .vn-card, .vn-panel, .vn-profile-card, .vn-form-card) {
+.vn-nav {
+    position: relative;
+    z-index: 20;
+    border-bottom: 1px solid var(--vn-border);
+    background: var(--vn-nav-bg);
+    backdrop-filter: blur(10px);
+}
+
+.vn-header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--vn-border);
+}
+
+.vn-scanlines {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.025) 0px,
+        rgba(255, 255, 255, 0.025) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.6;
+}
+
+.vn-star {
+    position: absolute;
+    color: var(--vn-accent);
+    opacity: 0.5;
+    font-size: 1.25rem;
+    pointer-events: none;
+    animation: vn-twinkle 3.5s ease-in-out infinite;
+}
+
+.vn-star--1 { top: 14%; left: 10%; animation-delay: 0s; }
+.vn-star--2 { top: 22%; right: 14%; font-size: 1.75rem; animation-delay: 0.6s; }
+.vn-star--3 { top: 62%; left: 6%; font-size: 1rem; animation-delay: 1.2s; }
+.vn-star--4 { top: 68%; right: 8%; animation-delay: 1.8s; }
+.vn-star--5 { top: 40%; right: 30%; font-size: 0.9rem; animation-delay: 2.4s; }
+
+@keyframes vn-twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.9); }
+    50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+:is(.vn-wordmark, .vn-title, .vn-page-title, .vn-card-title, .vn-panel-title, .vn-game__title) {
+    font-family: 'Fredoka', 'Rubik', sans-serif;
+    font-weight: 600;
+}
+
+.vn-title {
+    margin-top: 0.75rem;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 1.05;
+    font-weight: 700;
+    background: linear-gradient(
+        100deg,
+        var(--vn-accent-text) 0%,
+        var(--vn-accent) 30%,
+        var(--vn-muted) 55%,
+        var(--vn-status) 80%,
+        var(--vn-accent-text) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.vn-panel {
+    display: grid;
+    gap: 1.5rem;
+    border: 1px solid var(--vn-border);
+    border-radius: 1.25rem;
+    background: var(--vn-surface);
+    padding: 1.5rem;
+    backdrop-filter: blur(6px);
+}
+
+@media (min-width: 768px) {
+    .vn-panel { grid-template-columns: repeat(3, 1fr); }
+}
+
+.vn-panel-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.vn-panel-marker {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.vn-panel-title {
+    font-size: 1rem;
+}
+
+.vn-wordmark {
+    font-size: 1.15rem;
+    color: var(--vn-text);
+    text-decoration: none;
+}
+
+.vn-page-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.2;
+    color: var(--vn-text);
+}
+
+.vn-card-title {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    color: var(--vn-text);
+}
+
+.vn-card-subtitle,
+.vn-panel-text,
+.vn-hint {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--vn-muted);
+}
+
+.vn-eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: var(--vn-muted);
+}
+
+.vn-card,
+.vn-form-card {
+    position: relative;
+    border: 1px solid var(--vn-border);
+    border-radius: 1.25rem;
+    background: var(--vn-surface);
+    padding: 1.5rem;
+    color: var(--vn-text);
+    box-shadow: 0 14px 38px var(--vn-shadow);
+    backdrop-filter: blur(8px);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.vn-form-card {
+    padding: 1.75rem;
+}
+
+.vn-form-card:hover {
+    border-color: color-mix(in srgb, var(--vn-accent) 40%, var(--vn-border));
+}
+
+.vn-section-heading {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.vn-section-heading .vn-page-title {
+    font-size: 1.35rem;
+}
+
+.vn-card .vn-section-heading .vn-page-title,
+.vn-form-card .vn-section-heading .vn-page-title {
+    font-size: 1.25rem;
+}
+
+.vn-form-field + .vn-form-field {
+    margin-top: 1.25rem;
+}
+
+.vn-clamped-text {
+    color: var(--vn-text);
+    line-height: 1.5;
+}
+
+/* ---------- Tarjetas de novela en los índices ---------- */
+
+.vn-tile {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--vn-border);
+    border-radius: 1.25rem;
+    background: var(--vn-surface);
+    box-shadow: 0 14px 38px var(--vn-shadow);
+    backdrop-filter: blur(8px);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.vn-tile:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--vn-accent) 45%, var(--vn-border));
+    box-shadow: 0 20px 46px var(--vn-shadow);
+}
+
+.vn-tile:focus-within {
+    border-color: var(--vn-accent);
+    box-shadow: 0 0 0 3px var(--vn-focus);
+}
+
+.vn-tile > a {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.85rem 0.85rem 0.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.vn-tile-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 0.9rem;
+    object-fit: cover;
+    background: var(--vn-control-bg);
+}
+
+.vn-tile-cover--placeholder {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, var(--vn-surface-strong), var(--vn-control-bg));
+    color: var(--vn-accent-ink);
+    font-size: 3rem;
+}
+
+.vn-tile-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--vn-text);
+}
+
+.vn-tile-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--vn-muted);
+}
+
+.vn-tile-author {
+    margin-top: auto;
+    font-size: 0.8rem;
+    color: var(--vn-muted);
+}
+
+.vn-tag-chip,
+.vn-badge {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--vn-border);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    background: var(--vn-surface);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.vn-badge--draft {
+    background: var(--vn-surface);
+}
+
+.vn-badge--live {
+    background: color-mix(in srgb, var(--vn-status) 14%, transparent);
+}
+
+.vn-tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.75rem 0.85rem;
+    border-top: 1px solid var(--vn-border);
+}
+
+.vn-tile-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--vn-border);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    background: var(--vn-surface);
+    color: var(--vn-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.vn-tile-action:hover,
+.vn-tile-action:focus-visible {
+    border-color: var(--vn-accent);
+    background: var(--vn-choice-hover);
+}
+
+.vn-tile-action--play {
+    border-color: color-mix(in srgb, var(--vn-status) 45%, var(--vn-border));
+}
+
+.vn-tile-action--danger {
+    border-color: color-mix(in srgb, var(--vn-danger) 35%, var(--vn-border));
+    color: var(--vn-danger-text);
+}
+
+.vn-tile > .vn-like {
+    align-self: flex-start;
+    margin: 0 0.85rem 0.85rem;
+}
+
+html[data-vn-theme] .vn-card,
+html[data-vn-theme] .vn-form-card,
+html[data-vn-theme] .vn-panel,
+html[data-vn-theme] .vn-header,
+html[data-vn-theme] .vn-dropdown,
+html[data-vn-theme] .vn-profile-card,
+html[data-vn-theme] .vn-tile {
     background-color: var(--vn-surface) !important;
     border-color: var(--vn-border) !important;
     box-shadow: 0 14px 38px var(--vn-shadow);
     color: var(--vn-text) !important;
 }
 
-html[data-vn-theme] .vn-dropdown { background: var(--vn-control-bg) !important; }
+html[data-vn-theme] .vn-dropdown {
+    background: var(--vn-control-bg) !important;
+}
 
-html[data-vn-theme] :is(.vn-wordmark, .vn-title, .vn-page-title, .vn-panel-title, .vn-label, .vn-navlink, .vn-dropdown-link, .vn-link, .vn-panel-text, .vn-eyebrow, .vn-card-title, .vn-tile-title, .vn-scene-title, .vn-variable-name, .vn-choice-text, .vn-node-text) {
+/* ---------- Enlaces, botones y píldoras ---------- */
+
+.vn-link {
+    color: var(--vn-accent-text);
+    text-underline-offset: 0.2em;
+    transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+.vn-link:hover,
+.vn-link:focus-visible {
+    color: var(--vn-accent-ink);
+    text-decoration-color: currentColor;
+}
+
+.vn-link--danger {
+    color: var(--vn-danger-text);
+}
+
+.vn-link--danger:hover,
+.vn-link--danger:focus-visible {
+    color: var(--vn-danger-text);
+    filter: brightness(1.15);
+}
+
+.vn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0.7rem 1.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease,
+        border-color 180ms ease, color 180ms ease;
+}
+
+.vn-pill--sm {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+}
+
+.vn-pill:focus-visible,
+.vn-dropdown-link:focus-visible,
+.vn-choice:focus-visible,
+.vn-audio-toggle:focus-visible {
+    outline: 2px solid var(--vn-accent);
+    outline-offset: 2px;
+}
+
+.vn-pill:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.vn-pill--solid {
+    border-color: var(--vn-accent);
+    background: linear-gradient(135deg, var(--vn-accent), var(--vn-accent-strong));
+    color: var(--vn-on-accent);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--vn-accent) 34%, transparent);
+}
+
+.vn-pill--solid:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--vn-accent) 46%, transparent);
+}
+
+.vn-pill--ghost {
+    border-color: var(--vn-border);
+    background: var(--vn-surface);
+    color: var(--vn-text);
+}
+
+.vn-pill--ghost:hover:not(:disabled) {
+    border-color: var(--vn-status);
+    background: color-mix(in srgb, var(--vn-status) 10%, transparent);
+    color: var(--vn-status);
+}
+
+.vn-pill--danger {
+    border-color: var(--vn-danger);
+    background: linear-gradient(135deg, var(--vn-danger), var(--vn-danger-text));
+    color: var(--vn-text);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--vn-danger) 32%, transparent);
+}
+
+.vn-pill--danger:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+html[data-vn-theme] .vn-pill--solid {
+    border-color: var(--vn-accent) !important;
+    background: linear-gradient(135deg, var(--vn-accent), var(--vn-accent-strong)) !important;
+    color: var(--vn-on-accent) !important;
+}
+
+html[data-vn-theme] .vn-pill--ghost {
+    border-color: var(--vn-border) !important;
+    background: var(--vn-surface) !important;
     color: var(--vn-text) !important;
 }
 
-html[data-vn-theme] :is(.vn-card-subtitle, .vn-tile-desc, .vn-tile-author, .vn-tile-action, .vn-like, .vn-node-preview, .vn-tile-cover--placeholder, .vn-badge--draft) {
+html[data-vn-theme] .vn-pill--ghost:hover:not(:disabled) {
+    border-color: var(--vn-status) !important;
+    color: var(--vn-status) !important;
+}
+
+html[data-vn-theme] .vn-pill--danger {
+    border-color: var(--vn-danger) !important;
+    background: linear-gradient(135deg, var(--vn-danger), var(--vn-danger-text)) !important;
+    color: var(--vn-text) !important;
+}
+
+.vn-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 999px;
+    animation: vn-spin 700ms linear infinite;
+}
+
+@keyframes vn-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---------- Navegación y menús ---------- */
+
+.vn-navlink {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--vn-muted);
+    text-decoration: none;
+    transition: color 180ms ease, background 180ms ease;
+}
+
+.vn-navlink:hover,
+.vn-navlink:focus-visible {
+    background: var(--vn-surface);
+    color: var(--vn-accent-ink);
+}
+
+.vn-navlink--active {
+    background: color-mix(in srgb, var(--vn-accent) 14%, transparent);
+    color: var(--vn-accent-ink);
+}
+
+.vn-dropdown {
+    min-width: 12rem;
+    border-radius: 0.85rem;
+    padding: 0.4rem;
+}
+
+.vn-dropdown-ring {
+    box-shadow: inset 0 0 0 1px var(--vn-border);
+}
+
+.vn-dropdown-link {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    text-align: left;
+    color: var(--vn-text);
+    cursor: pointer;
+    transition: background 180ms ease, color 180ms ease;
+}
+
+.vn-dropdown-link:hover,
+.vn-dropdown-link:focus-visible {
+    background: var(--vn-surface);
+    color: var(--vn-accent-ink);
+}
+
+html[data-vn-theme] :is(.vn-wordmark, .vn-page-title, .vn-panel-title,
+    .vn-navlink, .vn-dropdown-link, .vn-panel-text, .vn-eyebrow, .vn-card-title,
+    .vn-tile-title, .vn-scene-title, .vn-variable-name, .vn-choice-text, .vn-node-text,
+    .vn-dialogue__speaker, .vn-game__title, .vn-modal__title) {
+    color: var(--vn-text) !important;
+}
+
+html[data-vn-theme] :is(.vn-card-subtitle, .vn-tile-desc, .vn-tile-author, .vn-tile-action,
+    .vn-like, .vn-node-preview, .vn-tile-cover--placeholder, .vn-badge--draft,
+    .vn-dialogue__hint, .vn-game__hint, .vn-hint) {
     color: var(--vn-muted) !important;
 }
 
@@ -150,16 +732,19 @@ html[data-vn-theme] :is(.vn-node-speaker, .vn-like--active, .vn-panel-marker) {
     color: var(--vn-accent-text) !important;
 }
 
-html[data-vn-theme] :is(.vn-link--danger, .vn-link--danger:hover, .vn-tile-action--danger, .vn-tile-action--danger:hover) {
+html[data-vn-theme] :is(.vn-link--danger, .vn-link--danger:hover, .vn-tile-action--danger,
+    .vn-tile-action--danger:hover) {
     color: var(--vn-danger-text) !important;
 }
 
-html[data-vn-theme] :is(.vn-link:hover, .vn-navlink:hover, .vn-dropdown-link:hover, .vn-tile-action:hover) {
+html[data-vn-theme] :is(.vn-link:hover, .vn-navlink:hover, .vn-dropdown-link:hover,
+    .vn-tile-action:hover) {
     color: var(--vn-accent-ink) !important;
 }
 
-html[data-vn-theme] .vn-pill--ghost:hover:not(:disabled) {
-    color: var(--vn-status) !important;
+html[data-vn-theme] .vn-navlink--active {
+    color: var(--vn-accent-ink) !important;
+    background: color-mix(in srgb, var(--vn-accent) 14%, transparent) !important;
 }
 
 html[data-vn-theme] :is([class~='text-[#FFF6FB]']) {
@@ -176,41 +761,114 @@ html[data-vn-theme] :is(
     color: var(--vn-muted) !important;
 }
 
-html[data-vn-theme] :is(.vn-navlink:hover, .vn-dropdown-link:hover) {
-    background: var(--vn-surface) !important;
+/* ---------- Formularios ---------- */
+
+.vn-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--vn-muted);
 }
 
-html[data-vn-theme] .vn-navlink--active {
-    color: var(--vn-accent-ink) !important;
-    background: color-mix(in srgb, var(--vn-accent) 14%, transparent) !important;
+.vn-input {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--vn-border);
+    border-radius: 0.65rem;
+    background: var(--vn-control-bg);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--vn-text);
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
-html[data-vn-theme] .vn-pill--solid {
-    border-color: var(--vn-accent) !important;
-    background: linear-gradient(135deg, var(--vn-accent), var(--vn-accent-strong)) !important;
-    color: var(--vn-on-accent) !important;
+.vn-input:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--vn-accent) 55%, var(--vn-border));
 }
 
-html[data-vn-theme] .vn-pill--ghost {
-    border-color: var(--vn-border) !important;
-    background: var(--vn-surface) !important;
-    color: var(--vn-text) !important;
+.vn-input:focus,
+.vn-input:focus-visible {
+    border-color: var(--vn-accent);
+    box-shadow: 0 0 0 3px var(--vn-focus);
 }
 
-html[data-vn-theme] :is(.vn-input, input:not([type='checkbox']):not([type='radio']), textarea) {
+.vn-input::placeholder {
+    color: var(--vn-muted);
+    opacity: 0.78;
+}
+
+.vn-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.vn-input option {
+    background: var(--vn-control-bg);
+    color: var(--vn-text);
+}
+
+.vn-input--sm {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+}
+
+.vn-input--error,
+.vn-input--error:focus,
+.vn-input--error:focus-visible {
+    border-color: var(--vn-danger-text) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vn-danger-text) 22%, transparent) !important;
+}
+
+.vn-checkbox {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.3rem;
+    accent-color: var(--vn-accent);
+    cursor: pointer;
+}
+
+.vn-status {
+    margin-top: 1rem;
+    border: 1px solid color-mix(in srgb, var(--vn-status) 35%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--vn-status) 12%, transparent);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--vn-status);
+}
+
+.vn-input-error {
+    color: var(--vn-danger-text);
+    font-size: 0.875rem;
+}
+
+.vn-narrative {
+    max-width: 65ch;
+    line-height: 1.7;
+}
+
+/* Los inputs nativos de color y archivo mantienen su control del navegador. */
+html[data-vn-theme] :is(.vn-input:not([type='color']):not([type='file']),
+    input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='file']),
+    textarea) {
     border-color: var(--vn-border) !important;
     background-color: var(--vn-control-bg) !important;
     color: var(--vn-text) !important;
 }
 
-html[data-vn-theme] :is(.vn-input, input, textarea)::placeholder {
+html[data-vn-theme] :is(.vn-input:not([type='color']):not([type='file']),
+    input:not([type='color']):not([type='file']),
+    textarea)::placeholder {
     color: var(--vn-muted) !important;
-    opacity: 0.78;
+    opacity: 0.8;
 }
 
 html[data-vn-theme='hopecore'] :is(.vn-input, input, textarea)::placeholder,
 html[data-vn-theme='white'] :is(.vn-input, input, textarea)::placeholder {
-    opacity: 0.92;
+    opacity: 0.95;
 }
 
 html[data-vn-theme] .vn-input option {
@@ -218,46 +876,337 @@ html[data-vn-theme] .vn-input option {
     color: var(--vn-text) !important;
 }
 
-html[data-vn-theme] .vn-scanlines { opacity: 0.28; }
-html[data-vn-theme] .vn-star { color: var(--vn-accent) !important; }
-
-html[data-vn-theme] .vn-theme-picker__select {
-    border-color: var(--vn-border) !important;
-    background: var(--vn-control-bg) !important;
-    color: var(--vn-text) !important;
+.vn-input[type='color'] {
+    width: 3.25rem;
+    height: 2.5rem;
+    padding: 0.2rem;
+    border: 1px solid var(--vn-border);
+    border-radius: 0.65rem;
+    background: var(--vn-control-bg);
+    cursor: pointer;
 }
+
+.vn-input[type='file'] {
+    border-color: var(--vn-border);
+    background: var(--vn-control-bg);
+    color: var(--vn-text);
+    cursor: pointer;
+}
+
+.vn-input[type='file']::file-selector-button {
+    margin-right: 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--vn-accent), var(--vn-accent-strong));
+    padding: 0.45rem 0.9rem;
+    color: var(--vn-on-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 180ms ease;
+}
+
+.vn-input[type='file']::file-selector-button:hover {
+    filter: brightness(1.1);
+}
+
+/* ---------- Modal ---------- */
+
+.vn-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--vn-modal-overlay);
+}
+
+.vn-modal {
+    width: 100%;
+    border: 1px solid var(--vn-border);
+    border-radius: 1.25rem;
+    background: var(--vn-surface-strong);
+    color: var(--vn-text);
+    box-shadow: 0 24px 60px var(--vn-shadow);
+}
+
+.vn-modal__body {
+    padding: 1.5rem;
+}
+
+.vn-modal__title {
+    font-family: 'Fredoka', 'Rubik', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.vn-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+/* ---------- Reproductor ---------- */
+
+.vn-game {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    min-height: 32rem;
+    overflow: hidden;
+    background: var(--vn-page-bg);
+    color: var(--vn-text);
+}
+
+.vn-game__scene {
+    position: absolute;
+    inset: 0;
+    background-color: var(--vn-control-bg);
+    background-position: center;
+    background-size: cover;
+}
+
+.vn-game__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--vn-game-overlay) 0%, transparent 62%);
+    pointer-events: none;
+}
+
+.vn-game__topbar {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: linear-gradient(to bottom, var(--vn-game-overlay), transparent);
+}
+
+.vn-game__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.vn-game__theme .vn-theme-picker__label {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .vn-game__theme .vn-theme-picker__label {
+        display: inline;
+    }
+}
+
+.vn-game__sprite {
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    z-index: 15;
+    max-height: 58%;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px var(--vn-shadow));
+}
+
+.vn-game__dialogue {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 20;
+    border-top: 1px solid var(--vn-border);
+    background: var(--vn-game-panel);
+    padding: 1.25rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -14px 40px var(--vn-shadow);
+}
+
+.vn-dialogue {
+    margin-inline: auto;
+    max-width: 72rem;
+}
+
+.vn-dialogue__speaker {
+    margin-bottom: 0.35rem;
+    font-family: 'Fredoka', 'Rubik', sans-serif;
+    font-weight: 600;
+    color: var(--vn-accent-text);
+}
+
+.vn-dialogue__text {
+    min-height: 3rem;
+    color: var(--vn-text);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    cursor: pointer;
+}
+
+.vn-dialogue__choices {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.vn-dialogue__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.vn-dialogue__hint {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.vn-choice {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--vn-border);
+    border-radius: 0.75rem;
+    background: var(--vn-choice-bg);
+    padding: 0.75rem 1rem;
+    color: var(--vn-text);
+    text-align: left;
+    font-size: 0.95rem;
+    transition: background 180ms ease, border-color 180ms ease, color 180ms ease,
+        transform 180ms ease;
+}
+
+.vn-choice:hover:not(:disabled),
+.vn-choice:focus-visible {
+    border-color: var(--vn-accent);
+    background: var(--vn-choice-hover);
+    color: var(--vn-text);
+    transform: translateX(2px);
+}
+
+.vn-choice:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.vn-audio-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--vn-border);
+    border-radius: 999px;
+    background: var(--vn-surface);
+    color: var(--vn-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.vn-audio-toggle:hover:not(:disabled) {
+    border-color: var(--vn-status);
+    background: color-mix(in srgb, var(--vn-status) 10%, transparent);
+    color: var(--vn-status);
+}
+
+.vn-audio-toggle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.vn-game__end {
+    position: relative;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+    background: var(--vn-game-overlay);
+}
+
+.vn-game__end-title {
+    font-family: 'Fredoka', 'Rubik', sans-serif;
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    font-weight: 700;
+    color: var(--vn-text);
+}
+
+.vn-game__end-text {
+    max-width: 65ch;
+    color: var(--vn-muted);
+    line-height: 1.7;
+}
+
+.vn-like {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--vn-border);
+    border-radius: 999px;
+    background: var(--vn-surface);
+    padding: 0.45rem 0.9rem;
+    color: var(--vn-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.vn-like:hover:not(:disabled),
+.vn-like:focus-visible {
+    border-color: var(--vn-accent);
+    color: var(--vn-accent-ink);
+}
+
+.vn-like--active {
+    color: var(--vn-accent-text);
+}
+
+.vn-like:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ---------- Ajustes por tema y accesibilidad ---------- */
 
 html[data-vn-theme='gothic'] :is(.vn-shell, .vn-page, .vn-title, .vn-page-title, .vn-wordmark) {
     font-family: Georgia, 'Times New Roman', serif !important;
 }
 
-html[data-vn-theme='gothic'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+html[data-vn-theme='gothic'] :is(.vn-card, .vn-form-card, .vn-panel, .vn-dropdown, .vn-modal) {
     border-radius: 0.35rem 1rem 0.35rem 1rem !important;
     box-shadow: inset 0 0 0 1px rgba(202, 157, 178, 0.07), 0 16px 42px var(--vn-shadow) !important;
 }
 
-html[data-vn-theme='hopecore'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+html[data-vn-theme='hopecore'] :is(.vn-card, .vn-form-card, .vn-panel, .vn-dropdown, .vn-modal) {
     border-radius: 1.5rem !important;
     box-shadow: 0 16px 42px var(--vn-shadow) !important;
 }
 
-html[data-vn-theme='white'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+html[data-vn-theme='white'] :is(.vn-card, .vn-form-card, .vn-panel, .vn-dropdown, .vn-modal) {
     box-shadow: 0 12px 34px var(--vn-shadow) !important;
 }
 
 html[data-vn-theme='hellfire'] :is(.vn-shell, .vn-page) {
-    background: radial-gradient(80% 45% at 50% 100%, rgba(224, 22, 63, 0.16) 0%, transparent 70%), var(--vn-page-bg) !important;
+    background: radial-gradient(80% 45% at 50% 100%, rgba(224, 22, 63, 0.16) 0%, transparent 70%),
+        var(--vn-page-bg) !important;
 }
 
 html[data-vn-theme='hellfire'] :is(.vn-title, .vn-page-title, .vn-wordmark) {
     text-shadow: 0 0 22px rgba(255, 90, 54, 0.4);
 }
 
-html[data-vn-theme='hellfire'] :is(.vn-card, .vn-panel, .vn-dropdown) {
+html[data-vn-theme='hellfire'] :is(.vn-card, .vn-form-card, .vn-panel, .vn-dropdown, .vn-modal) {
     border-radius: 0.9rem !important;
     box-shadow: inset 0 0 0 1px rgba(255, 90, 54, 0.09), 0 18px 46px var(--vn-shadow) !important;
 }
 
+/* Compatibilidad con overlays antiguos que aún usan clases de Tailwind. */
 html[data-vn-theme='hopecore'] [class~='bg-black/80'],
 html[data-vn-theme='white'] [class~='bg-black/80'] {
     background: rgba(255, 252, 244, 0.94) !important;
@@ -269,9 +1218,9 @@ html[data-vn-theme='white'] [class~='bg-black/80'] .text-white {
     color: var(--vn-text) !important;
 }
 
-html[data-vn-theme='dark'] [class~='bg-black/80'] { background: rgba(7, 11, 18, 0.92) !important; }
-html[data-vn-theme='gothic'] [class~='bg-black/80'] { background: rgba(14, 9, 17, 0.94) !important; }
-html[data-vn-theme='hellfire'] [class~='bg-black/80'] { background: rgba(12, 3, 5, 0.94) !important; }
+html[data-vn-theme='dark'] [class~='bg-black/80'] { background: rgba(7, 11, 18, 0.94) !important; }
+html[data-vn-theme='gothic'] [class~='bg-black/80'] { background: rgba(14, 9, 17, 0.95) !important; }
+html[data-vn-theme='hellfire'] [class~='bg-black/80'] { background: rgba(12, 3, 5, 0.95) !important; }
 
 @media (prefers-reduced-motion: reduce) {
     html[data-vn-theme] *,
@@ -279,6 +1228,7 @@ html[data-vn-theme='hellfire'] [class~='bg-black/80'] { background: rgba(12, 3, 
     html[data-vn-theme] *::after {
         scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }
-

@@ -7,10 +7,13 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 
+/**
+ * Marca como verificado el correo del usuario a partir de un enlace firmado.
+ */
 class VerifyEmailController extends Controller
 {
     /**
-     * Mark the authenticated user's email address as verified.
+     * Confirma la verificación del correo y redirige al panel.
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {

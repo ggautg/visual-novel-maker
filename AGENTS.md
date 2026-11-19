@@ -1,6 +1,10 @@
 <laravel-boost-guidelines>
 # Laravel Application
 
+> Estado de este repositorio: Laravel Boost **ya está instalado** (`composer.json`, `boost.json`) y sus guías están en `CLAUDE.md`. No vuelvas a ejecutar `composer require laravel/boost --dev` ni `php artisan boost:install`. La aplicación usa MySQL, idioma `es` y las instrucciones de arranque están en `README.md`.
+
+# Instalación original (solo referencia histórica)
+
 This repository contains a Laravel application. Complete the following setup before working on the user's request.
 
 ## Prerequisites

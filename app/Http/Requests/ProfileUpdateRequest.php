@@ -7,10 +7,13 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Valida los cambios de nombre y correo del perfil, evitando correos repetidos.
+ */
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
+     * Devuelve las reglas aplicables al perfil del usuario autenticado.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

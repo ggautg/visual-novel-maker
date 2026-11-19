@@ -5,10 +5,13 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Registra y arranca los servicios comunes de la aplicación.
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Registra los enlaces del contenedor de servicios.
      */
     public function register(): void
     {
@@ -16,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Configura el prefetch de Vite al arrancar la aplicación.
      */
     public function boot(): void
     {

@@ -1,7 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import ClampedText from '@/Components/ClampedText.vue';
+import EmptyState from '@/Components/EmptyState.vue';
+import LikeButton from '@/Components/LikeButton.vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { computed, reactive, ref, watch } from 'vue';
 
 const props = defineProps({
     novels: Array,
@@ -12,16 +15,73 @@ const props = defineProps({
 const search = ref(props.filters.search ?? '');
 const selectedTag = ref(props.filters.tag ?? '');
 
-const applyFilters = () => {
+// Explorar es público, pero dar «Me gusta» exige sesión.
+const esInvitado = computed(() => !usePage().props.auth?.user);
+
+const hayFiltrosActivos = computed(() => Boolean(search.value.trim() || selectedTag.value));
+
+// Estado local de cada tarjeta: el contador cambia al pulsar, antes de que llegue la respuesta.
+const estadosLike = reactive({});
+
+watch(
+    () => props.novels,
+    (novelas) => {
+        novelas.forEach((novela) => {
+            if (!estadosLike[novela.id]) {
+                estadosLike[novela.id] = {
+                    count: novela.likes_count ?? 0,
+                    liked: Boolean(novela.is_liked_by_me),
+                    disabled: false,
+                };
+            }
+        });
+    },
+    { immediate: true }
+);
+
+const aplicarFiltros = () => {
     router.get(
         route('novels.public'),
         { search: search.value || undefined, tag: selectedTag.value || undefined },
-        { preserveState: true, replace: true }
+        { preserveState: true, preserveScroll: true, replace: true }
     );
 };
 
-const toggleLike = (novelId) => {
-    router.post(route('novels.like', novelId), {}, { preserveScroll: true });
+const limpiarFiltros = () => {
+    search.value = '';
+    selectedTag.value = '';
+    props.filters.search = '';
+    props.filters.tag = '';
+    router.get(
+        route('novels.public'),
+        {},
+        { preserveState: true, preserveScroll: true, replace: true }
+    );
+};
+
+const alternarLike = (novela) => {
+    const estado = estadosLike[novela.id];
+    if (!estado || estado.disabled) {
+        return;
+    }
+
+    const meGustabaAntes = estado.liked;
+    const contadorAntes = estado.count;
+
+    estado.liked = !meGustabaAntes;
+    estado.count = Math.max(0, contadorAntes + (estado.liked ? 1 : -1));
+    estado.disabled = true;
+
+    router.post(route('novels.like', novela.id), {}, {
+        preserveScroll: true,
+        onError: () => {
+            estado.liked = meGustabaAntes;
+            estado.count = contadorAntes;
+        },
+        onFinish: () => {
+            estado.disabled = false;
+        },
+    });
 };
 </script>
 
@@ -31,20 +91,21 @@ const toggleLike = (novelId) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="vn-page-title">Explorar visual novels</h2>
+            <h2 class="vn-page-title">Explorar novelas visuales</h2>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-6 flex flex-wrap gap-3">
                     <input v-model="search" type="text" class="vn-input flex-1"
-                        placeholder="Buscar por título o descripción..." @keydown.enter="applyFilters" />
-                    <select v-model="selectedTag" class="vn-input" style="width: auto" @change="applyFilters">
-                        <option value="">Todos los tags</option>
+                        placeholder="Buscar por título o descripción…" @keydown.enter="aplicarFiltros" />
+                    <select v-model="selectedTag" class="vn-input" style="width: auto" @change="aplicarFiltros">
+                        <option value="">Todas las etiquetas</option>
                         <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
                     </select>
-                    <button @click="applyFilters" class="vn-pill vn-pill--solid">Buscar</button>
+                    <button type="button" @click="aplicarFiltros" class="vn-pill vn-pill--solid">Buscar</button>
                 </div>
+
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="novel in novels" :key="novel.id" class="vn-tile">
                         <Link :href="route('play.show', novel.id)">
@@ -52,7 +113,7 @@ const toggleLike = (novelId) => {
                             <div v-else class="vn-tile-cover vn-tile-cover--placeholder">✦</div>
 
                             <h3 class="vn-tile-title">{{ novel.title }}</h3>
-                            <p class="vn-tile-desc">{{ novel.description }}</p>
+                            <ClampedText :text="novel.description ?? ''" :lines="2" class="vn-tile-desc" />
 
                             <div v-if="novel.tags.length > 0" class="mt-2 flex flex-wrap gap-1.5">
                                 <span v-for="tag in novel.tags" :key="tag.id" class="vn-tag-chip">
@@ -63,153 +124,38 @@ const toggleLike = (novelId) => {
                             <p class="vn-tile-author">por {{ novel.user.name }}</p>
                         </Link>
 
-                        <button @click="toggleLike(novel.id)" class="vn-like"
-                            :class="{ 'vn-like--active': novel.is_liked_by_me }">
-                            {{ novel.is_liked_by_me ? '💗' : '🤍' }} {{ novel.likes_count }}
-                        </button>
+                        <Link v-if="esInvitado" :href="route('login')" class="vn-like">
+                            🤍 Inicia sesión para dar Me gusta
+                        </Link>
+                        <LikeButton
+                            v-else
+                            class="vn-like"
+                            :count="estadosLike[novel.id]?.count ?? novel.likes_count ?? 0"
+                            :liked="estadosLike[novel.id]?.liked ?? Boolean(novel.is_liked_by_me)"
+                            :disabled="estadosLike[novel.id]?.disabled ?? false"
+                            @toggle="alternarLike(novel)"
+                        />
                     </div>
-
-                    <p v-if="novels.length === 0" class="text-[#B8ACDD]">
-                        Todavía no hay novelas publicadas. ¡Publicá la tuya!
-                    </p>
                 </div>
+
+                <EmptyState
+                    v-if="novels.length === 0 && hayFiltrosActivos"
+                    title="No encontramos novelas con esos filtros"
+                    description="Prueba con otros términos o quita los filtros aplicados."
+                >
+                    <button type="button" class="vn-pill vn-pill--solid" @click="limpiarFiltros">
+                        Limpiar filtros
+                    </button>
+                </EmptyState>
+
+                <EmptyState
+                    v-else-if="novels.length === 0"
+                    title="Todavía no hay novelas publicadas"
+                    description="Publica la tuya para que otros lectores puedan descubrirla."
+                    action-label="Crear novela"
+                    :action-href="route('novels.create')"
+                />
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.vn-page-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    font-size: 1.35rem;
-    color: #fff6fb;
-}
-
-.vn-tile {
-    display: block;
-    border-radius: 1rem;
-    border: 1px solid rgba(201, 184, 255, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1rem;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.vn-tile:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 95, 162, 0.4);
-}
-
-.vn-tile-cover {
-    margin-bottom: 0.75rem;
-    height: 10rem;
-    width: 100%;
-    border-radius: 0.65rem;
-    object-fit: cover;
-}
-
-.vn-tile-cover--placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #2a1b54, #1a1140);
-    color: #c9b8ff;
-    font-size: 2rem;
-}
-
-.vn-tile-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 500;
-    font-size: 1.05rem;
-    color: #fff6fb;
-}
-
-.vn-tile-desc {
-    margin-top: 0.35rem;
-    font-size: 0.85rem;
-    color: #b8acdd;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.vn-tile-author {
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    color: #6e5fa3;
-}
-
-.vn-like {
-    margin-top: 0.6rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    color: #b8acdd;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-}
-
-.vn-like:hover {
-    transform: scale(1.08);
-}
-
-.vn-like--active {
-    color: #ff8fc0;
-}
-
-.vn-input {
-    border-radius: 0.6rem;
-    border: 1px solid rgba(201, 184, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-    color: #fff6fb;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-
-.vn-input:focus {
-    border-color: #ff5fa2;
-}
-
-.vn-input option {
-    background: #1a1140;
-    color: #fff6fb;
-}
-
-.vn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.vn-pill--solid {
-    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
-    color: #1a0f36;
-    box-shadow: 0 6px 18px rgba(255, 95, 162, 0.3);
-}
-
-.vn-pill--solid:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-.vn-tag-chip {
-    display: inline-flex;
-    border-radius: 999px;
-    background: rgba(94, 241, 230, 0.12);
-    color: #5ef1e6;
-    padding: 0.15rem 0.55rem;
-    font-size: 0.7rem;
-}
-</style>

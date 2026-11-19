@@ -1,7 +1,9 @@
 <script setup>
-import { Head, Link, router } from '@inertiajs/vue3';
-import { computed, ref, watch, onUnmounted } from 'vue';
-import ThemePicker from '../../Components/ThemePicker.vue';
+import { Head, router } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import DialogueBox from '../../Components/DialogueBox.vue';
+import GameFrame from '../../Components/GameFrame.vue';
+import GameTopBar from '../../Components/GameTopBar.vue';
 
 const props = defineProps({
     playthrough: Object,
@@ -11,149 +13,199 @@ const props = defineProps({
     isFinished: Boolean,
 });
 
-const characterName = computed(() => props.node?.character?.name ?? null);
-const characterColor = computed(() => props.node?.character?.color ?? '#ffffff');
-const expressionImage = computed(() => props.node?.expression?.image_url ?? null);
+const assetUrl = (path) => {
+    if (!path) return '';
+    return path.startsWith('http') || path.startsWith('/') ? path : `/storage/${path}`;
+};
 
-const backgroundStyle = computed(() => {
-    if (!props.scene?.background_image) return {};
-    return { backgroundImage: `url(/storage/${props.scene.background_image})` };
-});
+const characterName = computed(() => props.node?.character?.name ?? '');
+const expressionImage = computed(() => assetUrl(props.node?.expression?.image_url));
+const backgroundImage = computed(() => assetUrl(props.scene?.background_image));
+const choices = computed(() => props.node?.choices ?? []);
+const hasAudio = computed(() => Boolean(props.scene?.background_music));
+const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-const hasChoices = computed(() => props.node?.choices?.length > 0);
-
-// --- Lógica del efecto typewriter ---
+// --- Efecto de escritura ---
 const displayedText = ref('');
 const isTyping = ref(false);
+const TYPING_SPEED_MS = 25;
 let typingInterval = null;
 
-const TYPING_SPEED_MS = 25; // milisegundos entre cada letra
+const stopTyping = () => {
+    clearInterval(typingInterval);
+    typingInterval = null;
+    isTyping.value = false;
+};
 
 const startTyping = (fullText) => {
-    clearInterval(typingInterval);
+    stopTyping();
     displayedText.value = '';
-    isTyping.value = true;
 
+    if (!fullText || reduceMotion) {
+        displayedText.value = fullText ?? '';
+        return;
+    }
+
+    isTyping.value = true;
     let index = 0;
+
     typingInterval = setInterval(() => {
         displayedText.value += fullText[index];
-        index++;
+        index += 1;
 
-        if (index >= fullText.length) {
-            clearInterval(typingInterval);
-            isTyping.value = false;
-        }
+        if (index >= fullText.length) stopTyping();
     }, TYPING_SPEED_MS);
 };
 
 const skipTyping = () => {
-    if (isTyping.value && props.node) {
-        clearInterval(typingInterval);
-        displayedText.value = props.node.text;
-        isTyping.value = false;
-    }
+    if (!isTyping.value || !props.node) return;
+    stopTyping();
+    displayedText.value = props.node.text ?? '';
 };
 
-// Cada vez que llega un nodo nuevo (avanzamos de diálogo), reinicia el efecto
 watch(
-    () => props.node?.id,
-    () => {
-        if (props.node?.text) {
-            startTyping(props.node.text);
-        }
-    },
-    { immediate: true }
+    () => [props.node?.id, props.node?.text],
+    () => startTyping(props.node?.text ?? ''),
+    { immediate: true },
 );
 
-onUnmounted(() => clearInterval(typingInterval));
+// --- Audio de la escena ---
+const audioRef = ref(null);
+const audioEnabled = ref(true);
 
-// --- Avance del juego ---
+const toggleAudio = () => {
+    audioEnabled.value = !audioEnabled.value;
+};
+
+watch(audioEnabled, async (enabled) => {
+    const audio = audioRef.value;
+    if (!audio) return;
+
+    try {
+        if (enabled) await audio.play();
+        else audio.pause();
+    } catch {
+        audioEnabled.value = false;
+    }
+});
+
+onMounted(() => {
+    audioRef.value?.play?.().catch(() => {
+        audioEnabled.value = false;
+    });
+});
+
+// --- Avance y acciones de la partida ---
+const isAdvancing = ref(false);
+const isRestarting = ref(false);
+
 const advance = (choiceId = null) => {
-    // Si todavía se está escribiendo, el primer clic completa el texto en vez de avanzar
+    if (isAdvancing.value) return;
+
     if (isTyping.value) {
         skipTyping();
         return;
     }
 
+    isAdvancing.value = true;
+
     router.post(
         route('play.advance', props.playthrough.id),
         { choice_id: choiceId },
-        { preserveScroll: true }
+        {
+            preserveScroll: true,
+            onFinish: () => { isAdvancing.value = false; },
+        },
     );
 };
 
-const confirmRestart = () => {
-    if (confirm('¿Reiniciar la partida desde el principio? Se perderá todo tu progreso.')) {
-        router.post(route('play.restart', props.novel.id), {}, { preserveScroll: true });
-    }
+const restart = () => {
+    if (isRestarting.value) return;
+    isRestarting.value = true;
+
+    router.post(
+        route('play.restart', props.novel.id),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => { isRestarting.value = false; },
+        },
+    );
 };
+
+const toggleLike = () => {
+    router.post(
+        route('novels.like', props.novel.id),
+        {},
+        {
+            preserveScroll: true,
+            onError: () => router.reload({ only: ['novel'] }),
+        },
+    );
+};
+
+const exit = () => router.visit(route('novels.index'));
+
+onUnmounted(() => {
+    stopTyping();
+    audioRef.value?.pause?.();
+});
 </script>
 
 <template>
-
     <Head :title="`Jugando: ${novel.title}`" />
 
-    <div class="relative h-screen w-full bg-black bg-cover bg-center text-white" :style="backgroundStyle">
-        <ThemePicker class="absolute left-4 top-4 z-30" />
-        <!-- Música de fondo -->
-        <audio v-if="scene?.background_music" :src="`/storage/${scene.background_music}`" autoplay loop />
+    <GameFrame :background="backgroundImage">
+        <audio
+            v-if="hasAudio"
+            ref="audioRef"
+            :src="assetUrl(scene.background_music)"
+            autoplay
+            loop
+        ></audio>
 
-        <!-- Botón volver -->
-        <Link :href="route('novels.index')"
-            class="absolute right-4 top-4 rounded bg-black/50 px-3 py-1 text-sm hover:bg-black/70">
-            Salir
-        </Link>
+        <GameTopBar
+            :likes-count="novel.likes_count ?? 0"
+            :liked="Boolean(novel.is_liked_by_me)"
+            :audio-enabled="audioEnabled"
+            :audio-available="hasAudio"
+            :restarting="isRestarting"
+            @exit="exit"
+            @restart="restart"
+            @toggle-like="toggleLike"
+            @toggle-audio="toggleAudio"
+        />
 
-        <!-- Pantalla de fin -->
-        <div v-if="isFinished" class="flex h-full flex-col items-center justify-center gap-4 bg-black/70">
-            <h2 class="text-2xl font-bold">Fin de la historia</h2>
-            <Link :href="route('novels.index')" class="rounded bg-indigo-600 px-4 py-2 hover:bg-indigo-700">
+        <img
+            v-if="expressionImage"
+            :src="expressionImage"
+            class="vn-game__sprite"
+            :alt="characterName ? `Expresión de ${characterName}` : 'Ilustración de la escena'"
+        />
+
+        <div v-if="isFinished" class="vn-game__end">
+            <h2 class="vn-game__end-title">Fin de la historia</h2>
+            <p class="vn-game__end-text">
+                Has llegado al final de «{{ novel.title }}». ¿Te gustaría volver a empezar?
+            </p>
+            <button type="button" class="vn-pill vn-pill--solid" @click="exit">
                 Volver a mis novelas
-            </Link>
-
-            <!-- Botón volver + reiniciar -->
-            <div class="absolute right-4 top-4 flex gap-2">
-                <button @click="confirmRestart" class="rounded bg-black/50 px-3 py-1 text-sm hover:bg-black/70">
-                    ↺ Reiniciar
-                </button>
-                <Link :href="route('novels.index')" class="rounded bg-black/50 px-3 py-1 text-sm hover:bg-black/70">
-                    Salir
-                </Link>
-                <button @click="router.post(route('novels.like', novel.id), {}, { preserveScroll: true })"
-                    class="rounded bg-black/50 px-3 py-1 text-sm hover:bg-black/70">
-                    {{ novel.is_liked_by_me ? '💗' : '🤍' }} {{ novel.likes_count }}
-                </button>
-            </div>
+            </button>
         </div>
 
-        <!-- Cuadro de diálogo -->
-        <div v-else class="absolute inset-x-0 bottom-0 bg-black/80 p-6">
-            <!-- Sprite del personaje (si tiene expresión con imagen) -->
-            <img v-if="expressionImage" :src="expressionImage" class="absolute bottom-full left-8 h-64 object-contain"
-                :alt="characterName" />
-
-            <div class="mx-auto max-w-3xl">
-                <p v-if="characterName" class="mb-2 font-bold" :style="{ color: characterColor }">
-                    {{ characterName }}
-                </p>
-
-                <p class="mb-4 min-h-[3rem] cursor-pointer text-lg leading-relaxed" @click="skipTyping">
-                    {{ displayedText }}
-                </p>
-
-                <!-- Elecciones -->
-                <div v-if="hasChoices" class="space-y-2">
-                    <button v-for="choice in node.choices" :key="choice.id" @click="advance(choice.id)"
-                        class="block w-full rounded border border-white/30 bg-white/10 px-4 py-2 text-left hover:bg-white/20">
-                        {{ choice.text }}
-                    </button>
-                </div>
-
-                <!-- Avance lineal (sin elecciones) -->
-                <button v-else @click="advance()" class="rounded bg-indigo-600 px-4 py-2 hover:bg-indigo-700">
-                    Continuar →
-                </button>
-            </div>
-        </div>
-    </div>
+        <DialogueBox
+            v-else
+            :speaker="characterName"
+            :text="displayedText"
+            :choices="choices"
+            :disabled="isAdvancing"
+            :advancing="isAdvancing"
+            :typing="isTyping"
+            @advance="advance()"
+            @select="advance($event)"
+            @skip="skipTyping"
+        />
+    </GameFrame>
 </template>

@@ -8,10 +8,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Muestra el aviso para verificar el correo o redirige al panel si ya está verificado.
+ */
 class EmailVerificationPromptController extends Controller
 {
     /**
-     * Display the email verification prompt.
+     * Devuelve la página de verificación o redirige al usuario verificado.
      */
     public function __invoke(Request $request): RedirectResponse|Response
     {

@@ -9,7 +9,10 @@ import { applyTheme, readTheme } from './theme.js';
 
 applyTheme(readTheme());
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'VN Maker';
+
+const progressColor =
+    getComputedStyle(document.documentElement).getPropertyValue('--vn-accent').trim() || '#ff5fa2';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -25,6 +28,6 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: progressColor,
     },
 });

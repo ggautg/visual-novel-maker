@@ -1,8 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import ClampedText from '@/Components/ClampedText.vue';
+import ConfirmDeleteButton from '@/Components/ConfirmDeleteButton.vue';
+import EmptyState from '@/Components/EmptyState.vue';
+import FormField from '@/Components/FormField.vue';
+import SaveButton from '@/Components/SaveButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     scene: Object,
@@ -28,6 +32,7 @@ const submitCreate = () => {
     });
 };
 
+// Edición en línea: solo un nodo se edita a la vez.
 const editingId = ref(null);
 const editForm = useForm({
     character_id: '',
@@ -55,10 +60,24 @@ const submitEdit = (nodeId) => {
     });
 };
 
-const destroyNode = (nodeId) => {
-    if (confirm('¿Borrar este nodo de diálogo?')) {
-        useForm({}).delete(route('dialogue-nodes.destroy', nodeId));
-    }
+const etiquetasElecciones = computed(() => {
+    const etiquetas = {};
+    props.nodes.forEach((node) => {
+        const total = node.choices?.length ?? 0;
+        etiquetas[node.id] = total === 1 ? 'elección' : 'elecciones';
+    });
+    return etiquetas;
+});
+
+const eliminandoNodoId = ref(null);
+
+const eliminarNodo = (nodeId) => {
+    eliminandoNodoId.value = nodeId;
+    useForm({}).delete(route('dialogue-nodes.destroy', nodeId), {
+        onFinish: () => {
+            eliminandoNodoId.value = null;
+        },
+    });
 };
 
 const characterName = (id) => props.characters.find((c) => c.id === id)?.name ?? null;
@@ -82,16 +101,16 @@ const characterName = (id) => props.characters.find((c) => c.id === id)?.name ??
                 <!-- Formulario de creación -->
                 <form @submit.prevent="submitCreate" class="vn-card space-y-4">
                     <div class="flex gap-4">
-                        <div class="flex-1">
-                            <label class="vn-label">Personaje (opcional, vacío = narrador)</label>
-                            <select v-model="createForm.character_id" class="vn-input">
+                        <FormField id="crear-nodo-personaje" label="Personaje (opcional, vacío = narrador)"
+                            :error="createForm.errors.character_id" class="flex-1">
+                            <select id="crear-nodo-personaje" v-model="createForm.character_id" class="vn-input">
                                 <option value="">— Narrador —</option>
                                 <option v-for="c in characters" :key="c.id" :value="c.id">{{ c.name }}</option>
                             </select>
-                        </div>
-                        <div class="flex-1">
-                            <label class="vn-label">Expresión</label>
-                            <select
+                        </FormField>
+                        <FormField id="crear-nodo-expresion" label="Expresión"
+                            :error="createForm.errors.character_expression_id" class="flex-1">
+                            <select id="crear-nodo-expresion"
                                 v-model="createForm.character_expression_id"
                                 class="vn-input"
                                 :disabled="!createForm.character_id"
@@ -99,28 +118,35 @@ const characterName = (id) => props.characters.find((c) => c.id === id)?.name ??
                                 <option value="">— Ninguna —</option>
                                 <option v-for="e in createExpressions" :key="e.id" :value="e.id">{{ e.name }}</option>
                             </select>
-                        </div>
+                            <template #hint>Disponible solo si elegiste un personaje.</template>
+                        </FormField>
                     </div>
 
-                    <div>
-                        <label class="vn-label">Texto</label>
-                        <textarea v-model="createForm.text" class="vn-input" rows="2" required />
-                        <InputError :message="createForm.errors.text" class="mt-1" />
-                    </div>
+                    <FormField id="crear-nodo-texto" label="Texto" :error="createForm.errors.text">
+                        <textarea id="crear-nodo-texto" v-model="createForm.text" class="vn-input" rows="2" required />
+                        <template #hint>Escribe lo que dirá o narrará este nodo.</template>
+                    </FormField>
 
-                    <div>
-                        <label class="vn-label">Siguiente nodo (dejalo vacío si vas a usar elecciones)</label>
-                        <select v-model="createForm.next_node_id" class="vn-input">
+                    <FormField id="crear-nodo-siguiente" label="Siguiente nodo"
+                        :error="createForm.errors.next_node_id">
+                        <select id="crear-nodo-siguiente" v-model="createForm.next_node_id" class="vn-input">
                             <option value="">— Ninguno / fin —</option>
                             <option v-for="n in nodes" :key="n.id" :value="n.id">
                                 #{{ n.id }}: {{ n.text.substring(0, 40) }}
                             </option>
                         </select>
-                    </div>
+                        <template #hint>Déjalo vacío si vas a usar elecciones.</template>
+                    </FormField>
 
-                    <button type="submit" class="vn-pill vn-pill--solid" :disabled="createForm.processing">
-                        Agregar nodo
-                    </button>
+                    <SaveButton
+                        type="button"
+                        label="Agregar nodo"
+                        processing-label="Guardando…"
+                        success-label="Guardado"
+                        :processing="createForm.processing"
+                        :success="createForm.recentlySuccessful"
+                        @click="submitCreate"
+                    />
                 </form>
 
                 <!-- Listado de nodos -->
@@ -128,35 +154,50 @@ const characterName = (id) => props.characters.find((c) => c.id === id)?.name ??
                     <div v-for="node in nodes" :key="node.id" class="vn-card">
                         <div v-if="editingId === node.id" class="space-y-3">
                             <div class="flex gap-4">
-                                <select v-model="editForm.character_id" class="vn-input flex-1">
-                                    <option value="">— Narrador —</option>
-                                    <option v-for="c in characters" :key="c.id" :value="c.id">{{ c.name }}</option>
-                                </select>
-                                <select
-                                    v-model="editForm.character_expression_id"
-                                    class="vn-input flex-1"
-                                    :disabled="!editForm.character_id"
-                                >
-                                    <option value="">— Ninguna —</option>
-                                    <option v-for="e in editExpressions" :key="e.id" :value="e.id">{{ e.name }}</option>
-                                </select>
+                                <FormField :id="`editar-nodo-personaje-${node.id}`" label="Personaje"
+                                    :error="editForm.errors.character_id" class="flex-1">
+                                    <select :id="`editar-nodo-personaje-${node.id}`" v-model="editForm.character_id"
+                                        class="vn-input">
+                                        <option value="">— Narrador —</option>
+                                        <option v-for="c in characters" :key="c.id" :value="c.id">{{ c.name }}</option>
+                                    </select>
+                                </FormField>
+                                <FormField :id="`editar-nodo-expresion-${node.id}`" label="Expresión"
+                                    :error="editForm.errors.character_expression_id" class="flex-1">
+                                    <select :id="`editar-nodo-expresion-${node.id}`"
+                                        v-model="editForm.character_expression_id"
+                                        class="vn-input"
+                                        :disabled="!editForm.character_id"
+                                    >
+                                        <option value="">— Ninguna —</option>
+                                        <option v-for="e in editExpressions" :key="e.id" :value="e.id">{{ e.name }}</option>
+                                    </select>
+                                </FormField>
                             </div>
-                            <textarea v-model="editForm.text" class="vn-input" rows="2" />
-                            <select v-model="editForm.next_node_id" class="vn-input">
-                                <option value="">— Ninguno / fin —</option>
-                                <option v-for="n in nodes" :key="n.id" :value="n.id" :disabled="n.id === node.id">
-                                    #{{ n.id }}: {{ n.text.substring(0, 40) }}
-                                </option>
-                            </select>
+                            <FormField :id="`editar-nodo-texto-${node.id}`" label="Texto" :error="editForm.errors.text">
+                                <textarea :id="`editar-nodo-texto-${node.id}`" v-model="editForm.text"
+                                    class="vn-input" rows="2" />
+                            </FormField>
+                            <FormField :id="`editar-nodo-siguiente-${node.id}`" label="Siguiente nodo"
+                                :error="editForm.errors.next_node_id">
+                                <select :id="`editar-nodo-siguiente-${node.id}`" v-model="editForm.next_node_id"
+                                    class="vn-input">
+                                    <option value="">— Ninguno / fin —</option>
+                                    <option v-for="n in nodes" :key="n.id" :value="n.id" :disabled="n.id === node.id">
+                                        #{{ n.id }}: {{ n.text.substring(0, 40) }}
+                                    </option>
+                                </select>
+                            </FormField>
                             <div class="flex gap-3">
-                                <button
+                                <SaveButton
                                     type="button"
-                                    class="vn-pill vn-pill--solid"
-                                    :disabled="editForm.processing"
+                                    label="Guardar"
+                                    processing-label="Guardando…"
+                                    success-label="Guardado"
+                                    :processing="editForm.processing"
+                                    :success="editForm.recentlySuccessful"
                                     @click="submitEdit(node.id)"
-                                >
-                                    Guardar
-                                </button>
+                                />
                                 <button type="button" @click="editingId = null" class="vn-link text-sm">
                                     Cancelar
                                 </button>
@@ -166,129 +207,46 @@ const characterName = (id) => props.characters.find((c) => c.id === id)?.name ??
                         <div v-else class="flex items-start justify-between">
                             <div>
                                 <span class="text-xs text-[#6E5FA3]">#{{ node.id }}</span>
-                                <p class="vn-node-text">
+                                <div class="vn-node-text">
                                     <span v-if="characterName(node.character_id)" class="vn-node-speaker">
                                         {{ characterName(node.character_id) }}:
                                     </span>
-                                    {{ node.text }}
-                                </p>
-                                <p class="mt-1 text-xs text-[#8A7EC0]">
-                                    <span v-if="node.choices.length > 0">
-                                        {{ node.choices.length }} elección(es) →
-                                        {{ node.choices.map((c) => c.text).join(' / ') }}
-                                    </span>
+                                    <ClampedText :text="node.text" :lines="2" />
+                                </div>
+                                <div class="mt-1 text-xs text-[#8A7EC0]">
+                                    <template v-if="node.choices.length > 0">
+                                        <span>{{ node.choices.length }} {{ etiquetasElecciones[node.id] }} →</span>
+                                        <ClampedText :text="node.choices.map((c) => c.text).join(' / ')" :lines="1" />
+                                    </template>
                                     <span v-else-if="node.next_node_id">Sigue a → #{{ node.next_node_id }}</span>
                                     <span v-else>Fin de rama</span>
-                                </p>
+                                </div>
                             </div>
                             <div class="flex shrink-0 gap-3 text-sm">
                                 <Link :href="route('dialogue-nodes.choices.index', node.id)" class="vn-link">
                                     Elecciones
                                 </Link>
-                                <button @click="startEditing(node)" class="vn-link">Editar</button>
-                                <button @click="destroyNode(node.id)" class="vn-link vn-link--danger">Borrar</button>
+                                <button type="button" @click="startEditing(node)" class="vn-link">Editar</button>
+                                <ConfirmDeleteButton
+                                    title="Eliminar nodo"
+                                    message="¿Eliminar este nodo de diálogo?"
+                                    label="Eliminar"
+                                    :processing="eliminandoNodoId === node.id"
+                                    @confirm="eliminarNodo(node.id)"
+                                >
+                                    <span class="vn-link vn-link--danger" role="button" tabindex="0">Eliminar</span>
+                                </ConfirmDeleteButton>
                             </div>
                         </div>
                     </div>
 
-                    <p v-if="nodes.length === 0" class="text-[#B8ACDD]">
-                        Todavía no hay nodos de diálogo. Agregá el primero arriba.
-                    </p>
+                    <EmptyState
+                        v-if="nodes.length === 0"
+                        title="Todavía no hay nodos de diálogo"
+                        description="Agrega el primero con el formulario de arriba."
+                    />
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.vn-page-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    font-size: 1.35rem;
-    color: #fff6fb;
-}
-
-.vn-card {
-    border-radius: 1.25rem;
-    border: 1px solid rgba(201, 184, 255, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1.25rem;
-}
-
-.vn-label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.8rem;
-    color: #d9cffb;
-}
-
-.vn-input {
-    width: 100%;
-    border-radius: 0.6rem;
-    border: 1px solid rgba(201, 184, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-    color: #fff6fb;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-.vn-input:focus {
-    border-color: #ff5fa2;
-}
-.vn-input option {
-    background: #1a1140;
-    color: #fff6fb;
-}
-.vn-input:disabled {
-    opacity: 0.5;
-}
-
-.vn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.vn-pill--solid {
-    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
-    color: #1a0f36;
-    box-shadow: 0 6px 18px rgba(255, 95, 162, 0.3);
-}
-.vn-pill--solid:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-.vn-link {
-    color: #5ef1e6;
-    font-size: 0.85rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-.vn-link:hover {
-    color: #ffffff;
-}
-.vn-link--danger {
-    color: #ff6b8a;
-}
-.vn-link--danger:hover {
-    color: #ff9db3;
-}
-
-.vn-node-text {
-    font-size: 0.95rem;
-    color: #fff6fb;
-}
-.vn-node-speaker {
-    color: #ff8fc0;
-    font-weight: 600;
-}
-</style>

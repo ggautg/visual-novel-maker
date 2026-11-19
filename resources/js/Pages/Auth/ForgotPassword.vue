@@ -1,15 +1,15 @@
 <script setup>
+import FormField from '@/Components/FormField.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import SaveButton from '@/Components/SaveButton.vue';
+import TextInput from '@/Components/TextInput.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
-    status: { type: String },
+    status: { type: String, default: '' },
 });
 
-const form = useForm({
-    email: '',
-});
+const form = useForm({ email: '' });
 
 const submit = () => {
     form.post(route('password.email'));
@@ -18,110 +18,30 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Recuperar contraseña" />
+        <Head title="Restablece tu contraseña" />
 
         <h1 class="vn-card-title">¿Olvidaste tu contraseña?</h1>
         <p class="vn-card-subtitle">
-            No hay problema. Pasanos tu email y te mandamos un link para elegir una nueva.
+            No hay problema. Escribe tu correo electrónico y te enviaremos un enlace para elegir una nueva.
         </p>
 
-        <div v-if="status" class="vn-status">{{ status }}</div>
+        <div v-if="status" class="vn-status" role="status">{{ status }}</div>
 
-        <form @submit.prevent="submit" class="mt-6 space-y-4">
-            <div>
-                <label for="email" class="vn-label">Email</label>
-                <input
-                    id="email"
-                    v-model="form.email"
-                    type="email"
-                    class="vn-input"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-                <InputError class="mt-1" :message="form.errors.email" />
-            </div>
+        <form class="mt-6 space-y-5" @submit.prevent="submit">
+            <FormField id="email" label="Correo electrónico" :error="form.errors.email">
+                <TextInput v-model="form.email" type="email" required autocomplete="username" />
+            </FormField>
 
-            <button
-                type="submit"
-                class="vn-pill vn-pill--solid w-full"
-                :class="{ 'opacity-50': form.processing }"
-                :disabled="form.processing"
-            >
-                Enviar link de recuperación
-            </button>
+            <SaveButton
+                class="w-full"
+                :processing="form.processing"
+                label="Enviar enlace de recuperación"
+                processing-label="Enviando…"
+            />
         </form>
+
+        <p class="mt-6 text-center text-sm opacity-80">
+            <Link :href="route('login')" class="vn-link">Volver a iniciar sesión</Link>
+        </p>
     </GuestLayout>
 </template>
-
-<style scoped>
-.vn-card-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #fff6fb;
-}
-
-.vn-card-subtitle {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #b8acdd;
-}
-
-.vn-status {
-    margin-top: 1rem;
-    border-radius: 0.5rem;
-    background: rgba(94, 241, 230, 0.12);
-    padding: 0.6rem 0.9rem;
-    font-size: 0.85rem;
-    color: #5ef1e6;
-}
-
-.vn-label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.85rem;
-    color: #d9cffb;
-}
-
-.vn-input {
-    width: 100%;
-    border-radius: 0.65rem;
-    border: 1px solid rgba(201, 184, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.6rem 0.85rem;
-    font-size: 0.95rem;
-    color: #fff6fb;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-.vn-input:focus {
-    border-color: #ff5fa2;
-}
-
-.vn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.7rem 1.75rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: none;
-    cursor: pointer;
-}
-.vn-pill--solid {
-    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
-    color: #1a0f36;
-    box-shadow: 0 8px 24px rgba(255, 95, 162, 0.35);
-}
-.vn-pill--solid:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(255, 95, 162, 0.45);
-}
-.vn-pill--solid:disabled {
-    cursor: not-allowed;
-}
-</style>

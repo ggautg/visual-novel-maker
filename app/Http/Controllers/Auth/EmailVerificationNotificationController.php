@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Reenvía el aviso de verificación de correo cuando el usuario lo solicita.
+ */
 class EmailVerificationNotificationController extends Controller
 {
     /**
-     * Send a new email verification notification.
+     * Envía un nuevo enlace de verificación si el correo aún no está verificado.
      */
     public function store(Request $request): RedirectResponse
     {

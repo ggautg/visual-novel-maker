@@ -1,7 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmDeleteButton from '@/Components/ConfirmDeleteButton.vue';
+import EmptyState from '@/Components/EmptyState.vue';
+import FormField from '@/Components/FormField.vue';
+import SaveButton from '@/Components/SaveButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     novel: Object,
@@ -21,6 +25,7 @@ const submitCreate = () => {
     });
 };
 
+// Edición en línea: solo una escena se edita a la vez.
 const editingId = ref(null);
 const editForm = useForm({
     title: '',
@@ -44,10 +49,24 @@ const submitEdit = (sceneId) => {
         });
 };
 
-const destroyScene = (sceneId) => {
-    if (confirm('¿Borrar esta escena y todos sus diálogos?')) {
-        useForm({}).delete(route('scenes.destroy', sceneId));
-    }
+const etiquetasNodos = computed(() => {
+    const etiquetas = {};
+    props.scenes.forEach((scene) => {
+        const total = scene.dialogue_nodes_count ?? 0;
+        etiquetas[scene.id] = total === 1 ? 'nodo' : 'nodos';
+    });
+    return etiquetas;
+});
+
+const eliminandoEscenaId = ref(null);
+
+const eliminarEscena = (sceneId) => {
+    eliminandoEscenaId.value = sceneId;
+    useForm({}).delete(route('scenes.destroy', sceneId), {
+        onFinish: () => {
+            eliminandoEscenaId.value = null;
+        },
+    });
 };
 </script>
 
@@ -66,73 +85,72 @@ const destroyScene = (sceneId) => {
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Formulario de creación -->
                 <form @submit.prevent="submitCreate" class="vn-card space-y-4">
-                    <div>
-                        <label for="title" class="vn-label">Título (opcional, solo para referencia)</label>
-                        <input
-                            id="title"
-                            v-model="createForm.title"
-                            type="text"
-                            class="vn-input"
-                            placeholder="Ej: Capítulo 1 - La llegada"
-                        />
-                    </div>
+                    <FormField id="crear-escena-titulo" label="Título (opcional, solo para referencia)"
+                        :error="createForm.errors.title">
+                        <input id="crear-escena-titulo" v-model="createForm.title" type="text" class="vn-input"
+                            placeholder="Ej.: Capítulo 1: La llegada" />
+                        <template #hint>Sirve para identificar la escena en el editor.</template>
+                    </FormField>
 
                     <div class="flex flex-wrap gap-4">
-                        <div>
-                            <label for="bg-image" class="vn-label">Fondo (imagen)</label>
-                            <input
-                                id="bg-image"
-                                type="file"
-                                accept="image/*"
+                        <FormField id="crear-escena-imagen" label="Fondo (imagen)"
+                            :error="createForm.errors.background_image">
+                            <input id="crear-escena-imagen" type="file" accept="image/*"
                                 class="text-sm text-[#D9CFFB]"
-                                @change="(e) => (createForm.background_image = e.target.files[0])"
-                            />
-                        </div>
-                        <div>
-                            <label for="bg-music" class="vn-label">Música (mp3/ogg/wav)</label>
-                            <input
-                                id="bg-music"
-                                type="file"
-                                accept="audio/*"
+                                @change="(evento) => (createForm.background_image = evento.target.files[0])" />
+                            <template #hint>Imagen que se muestra detrás de los diálogos.</template>
+                        </FormField>
+                        <FormField id="crear-escena-musica" label="Música (mp3/ogg/wav)"
+                            :error="createForm.errors.background_music">
+                            <input id="crear-escena-musica" type="file" accept="audio/*"
                                 class="text-sm text-[#D9CFFB]"
-                                @change="(e) => (createForm.background_music = e.target.files[0])"
-                            />
-                        </div>
+                                @change="(evento) => (createForm.background_music = evento.target.files[0])" />
+                            <template #hint>Se reproduce mientras la escena esté activa.</template>
+                        </FormField>
                     </div>
 
-                    <button type="submit" class="vn-pill vn-pill--solid" :disabled="createForm.processing">
-                        Crear escena
-                    </button>
+                    <SaveButton
+                        type="button"
+                        label="Crear escena"
+                        processing-label="Guardando…"
+                        success-label="Guardado"
+                        :processing="createForm.processing"
+                        :success="createForm.recentlySuccessful"
+                        @click="submitCreate"
+                    />
                 </form>
 
                 <!-- Listado de escenas -->
                 <div class="space-y-3">
                     <div v-for="scene in scenes" :key="scene.id" class="vn-card">
                         <div v-if="editingId === scene.id" class="space-y-3">
-                            <input v-model="editForm.title" type="text" class="vn-input" />
+                            <FormField id="editar-escena-titulo" label="Título" :error="editForm.errors.title">
+                                <input id="editar-escena-titulo" v-model="editForm.title" type="text" class="vn-input" />
+                            </FormField>
                             <div class="flex flex-wrap gap-4">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    class="text-sm text-[#D9CFFB]"
-                                    @change="(e) => (editForm.background_image = e.target.files[0])"
-                                />
-                                <input
-                                    type="file"
-                                    accept="audio/*"
-                                    class="text-sm text-[#D9CFFB]"
-                                    @change="(e) => (editForm.background_music = e.target.files[0])"
-                                />
+                                <FormField id="editar-escena-imagen" label="Fondo (imagen)"
+                                    :error="editForm.errors.background_image">
+                                    <input id="editar-escena-imagen" type="file" accept="image/*"
+                                        class="text-sm text-[#D9CFFB]"
+                                        @change="(evento) => (editForm.background_image = evento.target.files[0])" />
+                                </FormField>
+                                <FormField id="editar-escena-musica" label="Música (mp3/ogg/wav)"
+                                    :error="editForm.errors.background_music">
+                                    <input id="editar-escena-musica" type="file" accept="audio/*"
+                                        class="text-sm text-[#D9CFFB]"
+                                        @change="(evento) => (editForm.background_music = evento.target.files[0])" />
+                                </FormField>
                             </div>
                             <div class="flex gap-3">
-                                <button
+                                <SaveButton
                                     type="button"
-                                    class="vn-pill vn-pill--solid"
-                                    :disabled="editForm.processing"
+                                    label="Guardar"
+                                    processing-label="Guardando…"
+                                    success-label="Guardado"
+                                    :processing="editForm.processing"
+                                    :success="editForm.recentlySuccessful"
                                     @click="submitEdit(scene.id)"
-                                >
-                                    Guardar
-                                </button>
+                                />
                                 <button type="button" @click="editingId = null" class="vn-link text-sm">
                                     Cancelar
                                 </button>
@@ -145,7 +163,7 @@ const destroyScene = (sceneId) => {
                                     {{ scene.title ?? `Escena #${scene.order}` }}
                                 </span>
                                 <span class="ml-2 text-xs text-[#6E5FA3]">
-                                    {{ scene.dialogue_nodes_count }} nodo(s) de diálogo
+                                    {{ scene.dialogue_nodes_count ?? 0 }} {{ etiquetasNodos[scene.id] }} de diálogo
                                 </span>
 
                                 <div class="mt-2 flex items-center gap-3">
@@ -153,6 +171,7 @@ const destroyScene = (sceneId) => {
                                         v-if="scene.background_image"
                                         :src="`/storage/${scene.background_image}`"
                                         class="h-16 w-24 rounded-lg border border-white/10 object-cover"
+                                        alt="Fondo de la escena"
                                     />
                                     <audio
                                         v-if="scene.background_music"
@@ -166,100 +185,27 @@ const destroyScene = (sceneId) => {
                                 <Link :href="route('scenes.dialogue-nodes.index', scene.id)" class="vn-link">
                                     Diálogos
                                 </Link>
-                                <button @click="startEditing(scene)" class="vn-link">Editar</button>
-                                <button @click="destroyScene(scene.id)" class="vn-link vn-link--danger">Borrar</button>
+                                <button type="button" @click="startEditing(scene)" class="vn-link">Editar</button>
+                                <ConfirmDeleteButton
+                                    title="Eliminar escena"
+                                    message="¿Eliminar esta escena y todos sus diálogos?"
+                                    label="Eliminar"
+                                    :processing="eliminandoEscenaId === scene.id"
+                                    @confirm="eliminarEscena(scene.id)"
+                                >
+                                    <span class="vn-link vn-link--danger" role="button" tabindex="0">Eliminar</span>
+                                </ConfirmDeleteButton>
                             </div>
                         </div>
                     </div>
 
-                    <p v-if="scenes.length === 0" class="text-[#B8ACDD]">
-                        Todavía no tenés escenas. Creá la primera arriba.
-                    </p>
+                    <EmptyState
+                        v-if="scenes.length === 0"
+                        title="Todavía no hay escenas"
+                        description="Crea la primera con el formulario de arriba."
+                    />
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.vn-page-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    font-size: 1.35rem;
-    color: #fff6fb;
-}
-
-.vn-card {
-    border-radius: 1.25rem;
-    border: 1px solid rgba(201, 184, 255, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1.25rem;
-}
-
-.vn-label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.8rem;
-    color: #d9cffb;
-}
-
-.vn-input {
-    width: 100%;
-    border-radius: 0.6rem;
-    border: 1px solid rgba(201, 184, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-    color: #fff6fb;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-.vn-input:focus {
-    border-color: #ff5fa2;
-}
-
-.vn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.vn-pill--solid {
-    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
-    color: #1a0f36;
-    box-shadow: 0 6px 18px rgba(255, 95, 162, 0.3);
-}
-.vn-pill--solid:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-
-.vn-link {
-    color: #5ef1e6;
-    font-size: 0.85rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-.vn-link:hover {
-    color: #ffffff;
-}
-.vn-link--danger {
-    color: #ff6b8a;
-}
-.vn-link--danger:hover {
-    color: #ff9db3;
-}
-
-.vn-scene-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 500;
-    color: #fff6fb;
-}
-</style>

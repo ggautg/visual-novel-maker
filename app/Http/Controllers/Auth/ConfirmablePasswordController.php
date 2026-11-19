@@ -10,10 +10,13 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Vuelve a pedir la contraseña para operaciones sensibles.
+ */
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password view.
+     * Muestra el formulario de confirmación de contraseña.
      */
     public function show(): Response
     {
@@ -21,7 +24,9 @@ class ConfirmablePasswordController extends Controller
     }
 
     /**
-     * Confirm the user's password.
+     * Verifica la contraseña y registra la hora de confirmación en la sesión.
+     *
+     * @throws ValidationException si la contraseña no coincide
      */
     public function store(Request $request): RedirectResponse
     {

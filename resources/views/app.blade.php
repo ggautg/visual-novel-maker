@@ -4,11 +4,31 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'VN Maker') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        {{-- Aplica el tema guardado antes de pintar para evitar el destello púrpura. --}}
+        <script>
+            (() => {
+                const temas = ['current', 'gothic', 'hopecore', 'dark', 'white', 'hellfire'];
+
+                try {
+                    const guardado = localStorage.getItem('vn-maker-theme');
+                    document.documentElement.dataset.vnTheme = temas.includes(guardado)
+                        ? guardado
+                        : 'current';
+                } catch {
+                    document.documentElement.dataset.vnTheme = 'current';
+                }
+            })();
+        </script>
+
+        {{-- Fuentes únicas para toda la aplicación. --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Rubik:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        >
 
         <!-- Scripts -->
         @routes

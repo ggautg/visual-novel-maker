@@ -5,17 +5,20 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+/**
+ * Comparte con todas las páginas Inertia los datos del usuario autenticado.
+ */
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that is loaded on the first page visit.
+     * Plantilla raíz que se carga en la primera petición.
      *
      * @var string
      */
     protected $rootView = 'app';
 
     /**
-     * Determine the current asset version.
+     * Devuelve la versión del frontend para invalidar la caché al desplegar.
      */
     public function version(Request $request): ?string
     {
@@ -23,7 +26,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
+     * Añade los datos de autenticación a las propiedades comunes de Inertia.
      *
      * @return array<string, mixed>
      */

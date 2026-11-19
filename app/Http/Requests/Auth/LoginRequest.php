@@ -10,10 +10,13 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Valida el acceso de los usuarios y limita los intentos fallidos.
+ */
 class LoginRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Permite que cualquier visitante intente autenticarse.
      */
     public function authorize(): bool
     {
@@ -21,7 +24,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Devuelve las reglas de correo y contraseña del formulario de acceso.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -34,7 +37,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Intenta autenticar al usuario y lanza un error en español si falla.
      *
      * @throws ValidationException
      */
@@ -54,7 +57,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * Bloquea temporalmente los intentos excesivos de acceso.
      *
      * @throws ValidationException
      */
@@ -66,18 +69,18 @@ class LoginRequest extends FormRequest
 
         event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $segundos = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
+                'seconds' => $segundos,
+                'minutes' => ceil($segundos / 60),
             ]),
         ]);
     }
 
     /**
-     * Get the rate limiting throttle key for the request.
+     * Construye la clave de limitación a partir del correo y la IP.
      */
     public function throttleKey(): string
     {

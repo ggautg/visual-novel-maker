@@ -5,14 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Character;
 use App\Models\Novel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Administra los personajes de una novela y sus expresiones.
+ */
 class CharacterController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(Novel $novel)
+    /**
+     * Lista los personajes de una novela propia con sus expresiones.
+     */
+    public function index(Novel $novel): Response
     {
         $this->authorize('update', $novel);
 
@@ -22,35 +30,44 @@ class CharacterController extends Controller
         ]);
     }
 
-    public function store(Request $request, Novel $novel)
+    /**
+     * Crea un personaje con nombre y color opcional.
+     */
+    public function store(Request $request, Novel $novel): RedirectResponse
     {
         $this->authorize('update', $novel);
 
-        $validated = $request->validate([
+        $validados = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'color' => ['nullable', 'string', 'max:7'],
         ]);
 
-        $novel->characters()->create($validated);
+        $novel->characters()->create($validados);
 
         return back();
     }
 
-    public function update(Request $request, Character $character)
+    /**
+     * Actualiza los datos de un personaje propio.
+     */
+    public function update(Request $request, Character $character): RedirectResponse
     {
         $this->authorize('update', $character->novel);
 
-        $validated = $request->validate([
+        $validados = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'color' => ['nullable', 'string', 'max:7'],
         ]);
 
-        $character->update($validated);
+        $character->update($validados);
 
         return back();
     }
 
-    public function destroy(Character $character)
+    /**
+     * Elimina un personaje propio.
+     */
+    public function destroy(Character $character): RedirectResponse
     {
         $this->authorize('update', $character->novel);
 

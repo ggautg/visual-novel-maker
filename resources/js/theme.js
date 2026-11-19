@@ -4,10 +4,10 @@ export const THEME_STORAGE_KEY = 'vn-maker-theme';
 export const THEMES = Object.freeze([
     Object.freeze({ id: 'current', label: 'Púrpura' }),
     Object.freeze({ id: 'gothic', label: 'Monja gótica' }),
-    Object.freeze({ id: 'hopecore', label: 'Sunshine esperanza (hopecore)' }),
-    Object.freeze({ id: 'dark', label: 'Dark' }),
-    Object.freeze({ id: 'white', label: 'White' }),
-    Object.freeze({ id: 'hellfire', label: 'Hellfire love' }),
+    Object.freeze({ id: 'hopecore', label: 'Esperanza luminosa' }),
+    Object.freeze({ id: 'dark', label: 'Oscuro' }),
+    Object.freeze({ id: 'white', label: 'Blanco' }),
+    Object.freeze({ id: 'hellfire', label: 'Amor infernal' }),
 ]);
 
 const themeIds = new Set(THEMES.map(({ id }) => id));
@@ -45,7 +45,7 @@ export function applyTheme(theme, root, storage) {
     try {
         resolveStorage(storage)?.setItem(THEME_STORAGE_KEY, selectedTheme);
     } catch {
-        // Keep the selected theme for this page even when browser storage is blocked.
+        // El tema elegido se mantiene en esta página aunque el navegador bloquee el almacenamiento.
     }
 
     return selectedTheme;

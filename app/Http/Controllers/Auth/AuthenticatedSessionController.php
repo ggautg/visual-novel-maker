@@ -11,10 +11,13 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Gestiona el inicio y cierre de sesión de los usuarios.
+ */
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Muestra el formulario de acceso con opción de recuperar contraseña.
      */
     public function create(): Response
     {
@@ -25,7 +28,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Autentica las credenciales recibidas y regenera la sesión.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -37,7 +40,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * Cierra la sesión actual e invalida el token de la sesión.
      */
     public function destroy(Request $request): RedirectResponse
     {

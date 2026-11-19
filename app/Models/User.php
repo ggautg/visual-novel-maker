@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Usuario de la aplicación: autor de novelas, jugador de partidas y lector favorito.
+ */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -18,7 +21,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
+     * Devuelve los tipos que deben convertirse al leer el modelo.
      *
      * @return array<string, string>
      */
@@ -30,11 +33,17 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Novelas creadas por el usuario.
+     */
     public function novels(): HasMany
     {
         return $this->hasMany(Novel::class);
     }
 
+    /**
+     * Novelas marcadas como favoritas por el usuario.
+     */
     public function likedNovels(): BelongsToMany
     {
         return $this->belongsToMany(Novel::class, 'novel_likes')->withTimestamps();

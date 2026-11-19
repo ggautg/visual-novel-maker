@@ -14,10 +14,13 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Registra usuarios nuevos y envía el aviso de verificación de correo.
+ */
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Muestra el formulario de registro.
      */
     public function create(): Response
     {
@@ -25,9 +28,9 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
+     * Valida los datos, crea el usuario y lo autentica.
      *
-     * @throws ValidationException
+     * @throws ValidationException si los datos no cumplen las reglas
      */
     public function store(Request $request): RedirectResponse
     {

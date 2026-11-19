@@ -14,10 +14,13 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Restablece la contraseña a partir de un token válido.
+ */
 class NewPasswordController extends Controller
 {
     /**
-     * Display the password reset view.
+     * Muestra el formulario para escribir la contraseña nueva.
      */
     public function create(Request $request): Response
     {
@@ -28,9 +31,9 @@ class NewPasswordController extends Controller
     }
 
     /**
-     * Handle an incoming new password request.
+     * Valida el token y guarda la contraseña nueva; informa del resultado en español.
      *
-     * @throws ValidationException
+     * @throws ValidationException si el token o los datos no son válidos
      */
     public function store(Request $request): RedirectResponse
     {
@@ -40,10 +43,7 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
+        $estado = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
                 $user->forceFill([
@@ -55,15 +55,12 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        if ($status == Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __($status));
+        if ($estado === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', __($estado));
         }
 
         throw ValidationException::withMessages([
-            'email' => [trans($status)],
+            'email' => [trans($estado)],
         ]);
     }
 }

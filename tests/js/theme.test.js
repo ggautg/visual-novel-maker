@@ -1,47 +1,41 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-let themeModule;
-try {
-    themeModule = await import('../../resources/js/theme.js');
-} catch {
-    themeModule = {};
-}
+// La importación se hace sin try/catch: si theme.js se rompe, el test debe fallar.
+const themeModule = await import('../../resources/js/theme.js');
 
-test('offers the six named themes and keeps the existing theme as default', () => {
+test('ofrece los seis temas con etiquetas en español', () => {
     assert.equal(themeModule.DEFAULT_THEME, 'current');
     assert.deepEqual(
-        themeModule.THEMES?.map(({ id, label }) => [id, label]),
+        themeModule.THEMES.map(({ id, label }) => [id, label]),
         [
             ['current', 'Púrpura'],
             ['gothic', 'Monja gótica'],
-            ['hopecore', 'Sunshine esperanza (hopecore)'],
-            ['dark', 'Dark'],
-            ['white', 'White'],
-            ['hellfire', 'Hellfire love'],
+            ['hopecore', 'Esperanza luminosa'],
+            ['dark', 'Oscuro'],
+            ['white', 'Blanco'],
+            ['hellfire', 'Amor infernal'],
         ],
     );
 });
 
-test('applies a theme to the document root and persists the selection', () => {
+test('aplica el tema al documento y recuerda la elección', () => {
     assert.equal(typeof themeModule.applyTheme, 'function');
     assert.equal(typeof themeModule.readTheme, 'function');
 
     const root = { dataset: {} };
-    const saved = new Map();
-    const storage = {
-        getItem: (key) => saved.get(key) ?? null,
-        setItem: (key, value) => saved.set(key, value),
+    const guardado = new Map();
+    const almacenamiento = {
+        getItem: (clave) => guardado.get(clave) ?? null,
+        setItem: (clave, valor) => guardado.set(clave, valor),
     };
 
-    assert.equal(themeModule.applyTheme('hopecore', root, storage), 'hopecore');
+    assert.equal(themeModule.applyTheme('hopecore', root, almacenamiento), 'hopecore');
     assert.equal(root.dataset.vnTheme, 'hopecore');
-    assert.equal(themeModule.readTheme(storage), 'hopecore');
+    assert.equal(themeModule.readTheme(almacenamiento), 'hopecore');
 });
 
-test('falls back to the current theme for unknown or unavailable preferences', () => {
-    assert.equal(typeof themeModule.readTheme, 'function');
-    assert.equal(typeof themeModule.applyTheme, 'function');
-    assert.equal(themeModule.readTheme({ getItem: () => 'not-a-theme' }), 'current');
-    assert.equal(themeModule.applyTheme('not-a-theme', { dataset: {} }, null), 'current');
+test('usa el tema púrpura cuando la preferencia no existe o no es válida', () => {
+    assert.equal(themeModule.readTheme({ getItem: () => 'no-existe' }), 'current');
+    assert.equal(themeModule.applyTheme('no-existe', { dataset: {} }, null), 'current');
 });

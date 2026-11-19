@@ -1,14 +1,11 @@
 <script setup>
+import FormField from '@/Components/FormField.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SaveButton from '@/Components/SaveButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
-const form = useForm({
-    password: '',
-});
+const form = useForm({ password: '' });
 
 const submit = () => {
     form.post(route('password.confirm'), {
@@ -19,37 +16,24 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Confirm Password" />
+        <Head title="Confirma tu contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
-        </div>
+        <h1 class="vn-card-title">Confirma tu contraseña</h1>
+        <p class="vn-card-subtitle">
+            Esta es un área protegida. Confirma tu contraseña antes de continuar.
+        </p>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="password" value="Password" />
+        <form class="mt-6 space-y-5" @submit.prevent="submit">
+            <FormField id="password" label="Contraseña" :error="form.errors.password">
                 <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password"
+                    type="password"
                     required
                     autocomplete="current-password"
-                    autofocus
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
+            </FormField>
 
-            <div class="mt-4 flex justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Confirm
-                </PrimaryButton>
-            </div>
+            <SaveButton class="w-full" :processing="form.processing" label="Confirmar" />
         </form>
     </GuestLayout>
 </template>

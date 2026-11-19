@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Novel;
-use App\Models\DialogueNode;
 
-// app/Models/Scene.php
+/**
+ * Escena de una novela: agrupa nodos de diálogo con fondo y música propios.
+ */
 class Scene extends Model
 {
     use HasFactory;
@@ -22,13 +22,19 @@ class Scene extends Model
         'order',
     ];
 
+    /**
+     * Novela a la que pertenece la escena.
+     */
     public function novel(): BelongsTo
     {
         return $this->belongsTo(Novel::class);
     }
 
+    /**
+     * Nodos de diálogo ordenados de la escena.
+     */
     public function dialogueNodes(): HasMany
-{
-    return $this->hasMany(DialogueNode::class)->orderBy('order');
-}
+    {
+        return $this->hasMany(DialogueNode::class)->orderBy('order');
+    }
 }

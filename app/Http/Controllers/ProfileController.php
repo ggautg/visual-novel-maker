@@ -8,13 +8,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Gestiona el perfil del usuario: visualización, actualización y borrado de cuenta.
+ */
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Muestra el formulario de perfil y el estado de verificación del correo.
      */
     public function edit(Request $request): Response
     {
@@ -25,7 +29,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Actualiza nombre y correo; si cambia el correo se invalida su verificación.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -41,7 +45,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Valida la contraseña, borra los archivos del usuario y elimina su cuenta.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -49,11 +53,35 @@ class ProfileController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
+        $usuario = $request->user();
+
+        $novelas = $usuario->novels()->with(['scenes', 'characters.expressions'])->get();
+
+        foreach ($novelas as $novel) {
+            if ($novel->cover_image) {
+                Storage::disk('public')->delete($novel->cover_image);
+            }
+
+            foreach ($novel->scenes as $scene) {
+                if ($scene->background_image) {
+                    Storage::disk('public')->delete($scene->background_image);
+                }
+
+                if ($scene->background_music) {
+                    Storage::disk('public')->delete($scene->background_music);
+                }
+            }
+
+            foreach ($novel->characters as $character) {
+                foreach ($character->expressions as $expression) {
+                    Storage::disk('public')->delete($expression->image_path);
+                }
+            }
+        }
 
         Auth::logout();
 
-        $user->delete();
+        $usuario->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

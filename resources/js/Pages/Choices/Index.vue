@@ -1,6 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import ClampedText from '@/Components/ClampedText.vue';
+import ConfirmDeleteButton from '@/Components/ConfirmDeleteButton.vue';
+import EmptyState from '@/Components/EmptyState.vue';
+import FormField from '@/Components/FormField.vue';
+import SaveButton from '@/Components/SaveButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { reactive, ref, watch } from 'vue';
 
@@ -22,6 +26,7 @@ const submitCreate = () => {
     });
 };
 
+// Edición en línea: solo una elección se edita a la vez.
 const editingId = ref(null);
 const editForm = useForm({
     text: '',
@@ -40,27 +45,37 @@ const submitEdit = (choiceId) => {
     });
 };
 
-const destroyChoice = (choiceId) => {
-    if (confirm('¿Borrar esta elección?')) {
-        useForm({}).delete(route('choices.destroy', choiceId));
-    }
+const eliminandoEleccionId = ref(null);
+const eliminandoEfectoId = ref(null);
+
+const eliminarEleccion = (choiceId) => {
+    eliminandoEleccionId.value = choiceId;
+    useForm({}).delete(route('choices.destroy', choiceId), {
+        onFinish: () => {
+            eliminandoEleccionId.value = null;
+        },
+    });
 };
 
-const nodePreview = (id) => {
-    const n = props.allNodes.find((n) => n.id === id);
-    return n ? `#${n.id}: ${n.text.substring(0, 40)}` : null;
+const eliminarEfecto = (effectId) => {
+    eliminandoEfectoId.value = effectId;
+    useForm({}).delete(route('variable-effects.destroy', effectId), {
+        onFinish: () => {
+            eliminandoEfectoId.value = null;
+        },
+    });
 };
 
-// --- Formularios de "efecto" independientes por choice ---
-// effectForms guarda un useForm() distinto para cada choice.id.
-// Se crean acá, en un watch que corre ANTES del render (flush por defecto
-// es 'pre'), en vez de crearlos "sobre la marcha" dentro del template.
-// Crear un useForm() durante el render es lo que causaba el error anterior:
-// el template podía intentar leer un formulario que todavía no existía.
+const vistaPreviaNodo = (id) => {
+    const nodo = props.allNodes.find((n) => n.id === id);
+    return nodo ? `#${nodo.id}: ${nodo.text.substring(0, 40)}` : null;
+};
+
+// Un useForm() por elección, creado antes del render para no compartir estado.
 const effectForms = reactive({});
 
 watch(
-    () => props.choices.map((c) => c.id),
+    () => props.choices.map((choice) => choice.id),
     (ids) => {
         ids.forEach((id) => {
             if (!effectForms[id]) {
@@ -83,14 +98,21 @@ const submitEffect = (choiceId) => {
     });
 };
 
-const destroyEffect = (effectId) => {
-    useForm({}).delete(route('variable-effects.destroy', effectId));
+const nombreVariable = (id) =>
+    props.variables.find((variable) => variable.id === id)?.label ??
+    props.variables.find((variable) => variable.id === id)?.key ??
+    '?';
+
+const descripcionEfecto = (effect) => {
+    const nombre = nombreVariable(effect.variable_id);
+    if (effect.operation === 'set') {
+        return `Fijar ${nombre} en ${effect.value}`;
+    }
+    if (effect.operation === 'decrement') {
+        return `Restar ${effect.value} a ${nombre}`;
+    }
+    return `Sumar ${effect.value} a ${nombre}`;
 };
-
-const variableName = (id) =>
-    props.variables.find((v) => v.id === id)?.label ?? props.variables.find((v) => v.id === id)?.key ?? '?';
-
-const operationLabel = (op) => ({ set: 'Fijar en', increment: 'Sumar', decrement: 'Restar' }[op]);
 </script>
 
 <template>
@@ -109,72 +131,92 @@ const operationLabel = (op) => ({ set: 'Fijar en', increment: 'Sumar', decrement
         <div class="py-12">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <div class="vn-node-preview">
-                    <strong>Texto del nodo:</strong> {{ node.text }}
+                    <strong>Texto del nodo:</strong>
+                    <ClampedText :text="node.text" :lines="3" />
                 </div>
 
                 <!-- Formulario de creación -->
                 <form @submit.prevent="submitCreate" class="vn-card space-y-4">
-                    <div>
-                        <label class="vn-label">Texto de la elección</label>
-                        <input v-model="createForm.text" type="text" class="vn-input" required />
-                        <InputError :message="createForm.errors.text" class="mt-1" />
-                    </div>
+                    <FormField id="crear-eleccion-texto" label="Texto de la elección" :error="createForm.errors.text">
+                        <input id="crear-eleccion-texto" v-model="createForm.text" type="text" class="vn-input" required />
+                        <template #hint>Lo que verá el jugador al elegir esta opción.</template>
+                    </FormField>
 
-                    <div>
-                        <label class="vn-label">A qué nodo lleva</label>
-                        <select v-model="createForm.next_node_id" class="vn-input">
+                    <FormField id="crear-eleccion-destino" label="A qué nodo lleva"
+                        :error="createForm.errors.next_node_id">
+                        <select id="crear-eleccion-destino" v-model="createForm.next_node_id" class="vn-input">
                             <option value="">— Ninguno / fin de rama —</option>
                             <option v-for="n in allNodes" :key="n.id" :value="n.id">
                                 #{{ n.id }}: {{ n.text.substring(0, 40) }}
                             </option>
                         </select>
-                    </div>
+                        <template #hint>Deja esta opción vacía para terminar la rama.</template>
+                    </FormField>
 
-                    <button type="submit" class="vn-pill vn-pill--solid" :disabled="createForm.processing">
-                        Agregar elección
-                    </button>
+                    <SaveButton
+                        type="button"
+                        label="Agregar elección"
+                        processing-label="Guardando…"
+                        success-label="Guardado"
+                        :processing="createForm.processing"
+                        :success="createForm.recentlySuccessful"
+                        @click="submitCreate"
+                    />
                 </form>
 
                 <!-- Listado -->
                 <div class="space-y-3">
                     <div v-for="choice in choices" :key="choice.id" class="vn-card">
                         <div v-if="editingId === choice.id" class="space-y-3">
-                            <input v-model="editForm.text" type="text" class="vn-input" />
-                            <select v-model="editForm.next_node_id" class="vn-input">
-                                <option value="">— Ninguno / fin de rama —</option>
-                                <option v-for="n in allNodes" :key="n.id" :value="n.id">
-                                    #{{ n.id }}: {{ n.text.substring(0, 40) }}
-                                </option>
-                            </select>
+                            <FormField id="editar-eleccion-texto" label="Texto de la elección"
+                                :error="editForm.errors.text">
+                                <input id="editar-eleccion-texto" v-model="editForm.text" type="text" class="vn-input" />
+                            </FormField>
+                            <FormField id="editar-eleccion-destino" label="A qué nodo lleva"
+                                :error="editForm.errors.next_node_id">
+                                <select id="editar-eleccion-destino" v-model="editForm.next_node_id" class="vn-input">
+                                    <option value="">— Ninguno / fin de rama —</option>
+                                    <option v-for="n in allNodes" :key="n.id" :value="n.id">
+                                        #{{ n.id }}: {{ n.text.substring(0, 40) }}
+                                    </option>
+                                </select>
+                            </FormField>
                             <div class="flex gap-3">
-                                <button
+                                <SaveButton
                                     type="button"
-                                    class="vn-pill vn-pill--solid"
-                                    :disabled="editForm.processing"
+                                    label="Guardar"
+                                    processing-label="Guardando…"
+                                    success-label="Guardado"
+                                    :processing="editForm.processing"
+                                    :success="editForm.recentlySuccessful"
                                     @click="submitEdit(choice.id)"
-                                >
-                                    Guardar
-                                </button>
+                                />
                                 <button type="button" @click="editingId = null" class="vn-link text-sm">
                                     Cancelar
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Solo renderizamos el bloque de efectos cuando su formulario ya existe -->
+                        <!-- Solo se muestra cuando su formulario de efectos ya existe -->
                         <div v-else-if="effectForms[choice.id]">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <p class="vn-choice-text">{{ choice.text }}</p>
+                                    <ClampedText :text="choice.text" :lines="2" class="vn-choice-text" />
                                     <p class="mt-1 text-xs text-[#6E5FA3]">
-                                        {{ nodePreview(choice.next_node_id) ?? 'Fin de rama' }}
+                                        {{ vistaPreviaNodo(choice.next_node_id) ?? 'Fin de rama' }}
                                     </p>
                                 </div>
                                 <div class="flex shrink-0 gap-3 text-sm">
-                                    <button @click="startEditing(choice)" class="vn-link">Editar</button>
-                                    <button @click="destroyChoice(choice.id)" class="vn-link vn-link--danger">
-                                        Borrar
-                                    </button>
+                                    <button type="button" @click="startEditing(choice)" class="vn-link">Editar</button>
+                                    <ConfirmDeleteButton
+                                        title="Eliminar elección"
+                                        message="¿Eliminar esta elección?"
+                                        label="Eliminar"
+                                        :processing="eliminandoEleccionId === choice.id"
+                                        @confirm="eliminarEleccion(choice.id)"
+                                    >
+                                        <span class="vn-link vn-link--danger" role="button" tabindex="0">Eliminar</span>
+                                    </ConfirmDeleteButton>
                                 </div>
                             </div>
 
@@ -185,167 +227,72 @@ const operationLabel = (op) => ({ set: 'Fijar en', increment: 'Sumar', decrement
                                     :key="effect.id"
                                     class="mb-2 flex items-center gap-2 text-sm"
                                 >
-                                    <span class="text-[#D9CFFB]">
-                                        {{ operationLabel(effect.operation) }} {{ effect.value }} a
-                                        {{ variableName(effect.variable_id) }}
-                                    </span>
-                                    <button @click="destroyEffect(effect.id)" class="vn-link vn-link--danger text-xs">
-                                        quitar
-                                    </button>
+                                    <span class="text-[#D9CFFB]">{{ descripcionEfecto(effect) }}</span>
+                                    <ConfirmDeleteButton
+                                        title="Eliminar efecto"
+                                        message="¿Quitar este efecto de la elección?"
+                                        label="Eliminar"
+                                        :processing="eliminandoEfectoId === effect.id"
+                                        @confirm="eliminarEfecto(effect.id)"
+                                    >
+                                        <span class="vn-link vn-link--danger text-xs" role="button" tabindex="0">Eliminar</span>
+                                    </ConfirmDeleteButton>
                                 </div>
 
                                 <form @submit.prevent="submitEffect(choice.id)" class="flex flex-wrap items-end gap-2">
-                                    <select v-model="effectForms[choice.id].variable_id" class="vn-input vn-input--sm">
-                                        <option value="" disabled>Variable...</option>
-                                        <option v-for="v in variables" :key="v.id" :value="v.id">
-                                            {{ v.label || v.key }}
-                                        </option>
-                                    </select>
-                                    <select v-model="effectForms[choice.id].operation" class="vn-input vn-input--sm">
-                                        <option value="increment">Sumar</option>
-                                        <option value="decrement">Restar</option>
-                                        <option value="set">Fijar</option>
-                                    </select>
-                                    <input
-                                        v-model.number="effectForms[choice.id].value"
-                                        type="number"
-                                        class="vn-input vn-input--sm w-20"
+                                    <FormField :id="`efecto-variable-${choice.id}`" label="Variable"
+                                        :error="effectForms[choice.id].errors.variable_id">
+                                        <select :id="`efecto-variable-${choice.id}`"
+                                            v-model="effectForms[choice.id].variable_id"
+                                            class="vn-input vn-input--sm"
+                                        >
+                                            <option value="" disabled>Elige una variable…</option>
+                                            <option v-for="variable in variables" :key="variable.id"
+                                                :value="variable.id">
+                                                {{ variable.label || variable.key }}
+                                            </option>
+                                        </select>
+                                    </FormField>
+                                    <FormField :id="`efecto-operacion-${choice.id}`" label="Operación"
+                                        :error="effectForms[choice.id].errors.operation">
+                                        <select :id="`efecto-operacion-${choice.id}`"
+                                            v-model="effectForms[choice.id].operation"
+                                            class="vn-input vn-input--sm"
+                                        >
+                                            <option value="increment">Sumar</option>
+                                            <option value="decrement">Restar</option>
+                                            <option value="set">Fijar</option>
+                                        </select>
+                                    </FormField>
+                                    <FormField :id="`efecto-valor-${choice.id}`" label="Valor"
+                                        :error="effectForms[choice.id].errors.value">
+                                        <input :id="`efecto-valor-${choice.id}`"
+                                            v-model.number="effectForms[choice.id].value"
+                                            type="number"
+                                            class="vn-input vn-input--sm w-20"
+                                        />
+                                    </FormField>
+                                    <SaveButton
+                                        type="button"
+                                        label="Agregar efecto"
+                                        processing-label="Guardando…"
+                                        success-label="Guardado"
+                                        :processing="effectForms[choice.id].processing"
+                                        :success="effectForms[choice.id].recentlySuccessful"
+                                        @click="submitEffect(choice.id)"
                                     />
-                                    <button
-                                        type="submit"
-                                        class="vn-pill vn-pill--ghost text-xs"
-                                        :disabled="effectForms[choice.id].processing"
-                                    >
-                                        Agregar efecto
-                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    <p v-if="choices.length === 0" class="text-[#B8ACDD]">
-                        Este nodo todavía no tiene elecciones. Si agregás una, el juego mostrará
-                        estas opciones en vez de avanzar automáticamente.
-                    </p>
+                    <EmptyState
+                        v-if="choices.length === 0"
+                        title="Todavía no hay elecciones"
+                        description="Agrega una para que el juego muestre opciones en vez de avanzar automáticamente."
+                    />
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.vn-page-title {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 600;
-    font-size: 1.35rem;
-    color: #fff6fb;
-}
-
-.vn-node-preview {
-    border-radius: 0.75rem;
-    background: rgba(94, 241, 230, 0.08);
-    border: 1px solid rgba(94, 241, 230, 0.2);
-    padding: 0.85rem 1rem;
-    font-size: 0.9rem;
-    color: #d9cffb;
-}
-
-.vn-card {
-    border-radius: 1.25rem;
-    border: 1px solid rgba(201, 184, 255, 0.15);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1.25rem;
-}
-
-.vn-label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.8rem;
-    color: #d9cffb;
-}
-
-.vn-input {
-    width: 100%;
-    border-radius: 0.6rem;
-    border: 1px solid rgba(201, 184, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.55rem 0.8rem;
-    font-size: 0.9rem;
-    color: #fff6fb;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-.vn-input:focus {
-    border-color: #ff5fa2;
-}
-.vn-input option {
-    background: #1a1140;
-    color: #fff6fb;
-}
-.vn-input--sm {
-    width: auto;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-}
-
-.vn-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.vn-pill--solid {
-    background: linear-gradient(135deg, #ff5fa2, #ff8fc0);
-    color: #1a0f36;
-    box-shadow: 0 6px 18px rgba(255, 95, 162, 0.3);
-}
-.vn-pill--solid:hover:not(:disabled) {
-    transform: translateY(-2px);
-}
-.vn-pill--ghost {
-    border: 1px solid rgba(201, 184, 255, 0.3);
-    background: transparent;
-    color: #d9cffb;
-    padding: 0.4rem 1rem;
-}
-.vn-pill--ghost:hover:not(:disabled) {
-    border-color: #5ef1e6;
-    color: #5ef1e6;
-}
-
-.vn-link {
-    color: #5ef1e6;
-    font-size: 0.85rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-.vn-link:hover {
-    color: #ffffff;
-}
-.vn-link--danger {
-    color: #ff6b8a;
-}
-.vn-link--danger:hover {
-    color: #ff9db3;
-}
-
-.vn-choice-text {
-    font-family: 'Fredoka', sans-serif;
-    font-weight: 500;
-    color: #fff6fb;
-}
-
-.vn-effects {
-    margin-top: 0.85rem;
-    border-top: 1px solid rgba(201, 184, 255, 0.1);
-    padding-top: 0.85rem;
-}
-</style>
